@@ -71,26 +71,31 @@ export async function startLectureSession(
       onError: handlers.onError,
     });
   } else if (engine.id !== "none") {
-    capture = await startCapture(prefs.deviceId, (pcmChunk) => {
-      transcribeQueue = transcribeQueue.then(async () => {
-        if (closed || !engine.transcribe) return;
-        handlers.onPartial("Transcribing…");
-        try {
-          const result = await engine.transcribe({
-            pcm: pcmChunk.pcm,
-            sampleRate: pcmChunk.sampleRate,
-            language: prefs.language,
-          });
-          emitText(result.text, pcmChunk.startMs, pcmChunk.endMs, result.language);
-        } catch (error) {
-          if (!closed) {
-            handlers.onError(error instanceof Error ? error : new Error("Transcription failed."));
+    try {
+      capture = await startCapture(prefs.deviceId, (pcmChunk) => {
+        transcribeQueue = transcribeQueue.then(async () => {
+          if (closed || !engine.transcribe) return;
+          handlers.onPartial("Transcribing…");
+          try {
+            const result = await engine.transcribe({
+              pcm: pcmChunk.pcm,
+              sampleRate: pcmChunk.sampleRate,
+              language: prefs.language,
+            });
+            emitText(result.text, pcmChunk.startMs, pcmChunk.endMs, result.language);
+          } catch (error) {
+            if (!closed) {
+              handlers.onError(error instanceof Error ? error : new Error("Transcription failed."));
+            }
+          } finally {
+            handlers.onPartial("");
           }
-        } finally {
-          handlers.onPartial("");
-        }
+        });
       });
-    });
+    } catch (error) {
+      engine.stop();
+      throw error instanceof Error ? error : new Error("Could not start the microphone.");
+    }
   }
 
   handlers.onStatus("recording");

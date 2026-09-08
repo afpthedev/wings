@@ -17,18 +17,8 @@ export type CaptureHandle = {
   stop: () => Promise<void>;
 };
 
-const WORKLET_SOURCE = `
-class PcmCaptureProcessor extends AudioWorkletProcessor {
-  process(inputs) {
-    const channel = inputs[0] && inputs[0][0];
-    if (channel && channel.length) {
-      this.port.postMessage(channel.slice());
-    }
-    return true;
-  }
-}
-registerProcessor("pcm-capture", PcmCaptureProcessor);
-`;
+/** Same-origin classic script. Blob/data worklets are blocked by production CSP. */
+export const PCM_WORKLET_URL = "/pcm-capture-worklet.js";
 
 function audioContextCtor(): typeof AudioContext | undefined {
   if (typeof window === "undefined") return undefined;
@@ -46,6 +36,10 @@ export async function listMicrophones(): Promise<MicrophoneInfo[]> {
     }));
 }
 
+function releaseStream(stream: MediaStream) {
+  stream.getTracks().forEach((track) => track.stop());
+}
+
 export async function startCapture(
   deviceId: string | null,
   onChunk: (chunk: PcmChunk) => void,
@@ -61,7 +55,7 @@ export async function startCapture(
   const stream = await navigator.mediaDevices.getUserMedia(constraints);
   const Context = audioContextCtor();
   if (!Context) {
-    stream.getTracks().forEach((track) => track.stop());
+    releaseStream(stream);
     throw new Error("Web Audio is not available in this browser.");
   }
   const context = new Context();
@@ -97,26 +91,29 @@ export async function startCapture(
   };
 
   let node: AudioWorkletNode | ScriptProcessorNode;
-  let workletUrl: string | null = null;
 
-  if (context.audioWorklet) {
-    workletUrl = URL.createObjectURL(new Blob([WORKLET_SOURCE], { type: "application/javascript" }));
-    await context.audioWorklet.addModule(workletUrl);
-    const worklet = new AudioWorkletNode(context, "pcm-capture");
-    worklet.port.onmessage = (event: MessageEvent<Float32Array>) => ingest(event.data);
-    source.connect(worklet);
-    worklet.connect(mute);
-    mute.connect(context.destination);
-    node = worklet;
-  } else {
-    const processor = context.createScriptProcessor(4096, 1, 1);
-    processor.onaudioprocess = (event) => {
-      ingest(event.inputBuffer.getChannelData(0));
-    };
-    source.connect(processor);
-    processor.connect(mute);
-    mute.connect(context.destination);
-    node = processor;
+  try {
+    if (context.audioWorklet) {
+      await context.audioWorklet.addModule(PCM_WORKLET_URL);
+      const worklet = new AudioWorkletNode(context, "pcm-capture");
+      worklet.port.onmessage = (event: MessageEvent<Float32Array>) => ingest(event.data);
+      source.connect(worklet);
+      worklet.connect(mute);
+      mute.connect(context.destination);
+      node = worklet;
+    } else {
+      node = attachScriptProcessor(context, source, mute, ingest);
+    }
+  } catch {
+    try {
+      node = attachScriptProcessor(context, source, mute, ingest);
+    } catch (error) {
+      source.disconnect();
+      mute.disconnect();
+      releaseStream(stream);
+      await context.close().catch(() => undefined);
+      throw error instanceof Error ? error : new Error("Could not start microphone capture.");
+    }
   }
 
   return {
@@ -127,9 +124,24 @@ export async function startCapture(
       node.disconnect();
       source.disconnect();
       mute.disconnect();
-      stream.getTracks().forEach((track) => track.stop());
-      if (workletUrl) URL.revokeObjectURL(workletUrl);
+      releaseStream(stream);
       await context.close();
     },
   };
+}
+
+function attachScriptProcessor(
+  context: AudioContext,
+  source: MediaStreamAudioSourceNode,
+  mute: GainNode,
+  ingest: (samples: Float32Array) => void,
+): ScriptProcessorNode {
+  const processor = context.createScriptProcessor(4096, 1, 1);
+  processor.onaudioprocess = (event) => {
+    ingest(event.inputBuffer.getChannelData(0));
+  };
+  source.connect(processor);
+  processor.connect(mute);
+  mute.connect(context.destination);
+  return processor;
 }

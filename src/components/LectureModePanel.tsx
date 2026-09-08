@@ -301,6 +301,8 @@ export function LectureModePanel({ open, onClose, hasPage, canEdit }: Props) {
               {resolved.engine === "whisper" ? ` · ${model.label} (${formatBytes(model.bytes)})` : ""}
             </p>
 
+            {error && <p className="text-[11px] text-destructive">{error}</p>}
+
             <Button
               data-testid="lecture-start"
               className="w-full"

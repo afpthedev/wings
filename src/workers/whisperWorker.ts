@@ -40,9 +40,14 @@ async function loadPipeline(model: string, device: "webgpu" | "wasm", onProgress
   const env = transformers.env as {
     allowLocalModels?: boolean;
     useBrowserCache?: boolean;
+    backends?: { onnx?: { wasm?: { numThreads?: number; proxy?: boolean } } };
   };
   env.allowLocalModels = false;
   env.useBrowserCache = true;
+  if (env.backends?.onnx?.wasm) {
+    env.backends.onnx.wasm.proxy = false;
+    env.backends.onnx.wasm.numThreads = 1;
+  }
 
   const create = transformers.pipeline as unknown as (
     task: "automatic-speech-recognition",
