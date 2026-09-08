@@ -1,6 +1,6 @@
 # Wings - full agent context
 
-> Block editor for nested pages with LaTeX, Excalidraw, a local vault folder, and BYOK AI. Private journal product on https://wings.nopejs.me
+> Nested pages with LaTeX, Excalidraw, on-device lecture transcription, a local vault folder, and BYOK AI. Private journal product on https://wings.nopejs.me
 
 ## Summary
 

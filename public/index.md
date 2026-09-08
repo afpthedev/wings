@@ -1,8 +1,8 @@
 # Wings
 
-Block editor for notes with nested pages, LaTeX math, Excalidraw drawings, and a BYOK AI panel.
+Notes with nested pages, LaTeX math, Excalidraw drawings, on-device lecture transcription, and a BYOK AI panel.
 
-**Tagline:** notes, math, drawings, and ai in one editor.
+**Tagline:** notes, lectures, math, drawings, and ai.
 
 ## Sign in
 
@@ -11,7 +11,8 @@ Block editor for notes with nested pages, LaTeX math, Excalidraw drawings, and a
 
 ## Highlights
 
-- Nested pages and a block editor with slash commands
+- Nested pages and slash commands
+- Lecture Mode: record from the mic, transcribe on-device, append timestamped notes to the open page
 - LaTeX math and Excalidraw drawings
 - AI panel that reads the open page (keys stay in your browser)
 - Share by public link or email invite

@@ -1,6 +1,6 @@
 # Docs · Wings
 
-Product documentation for [Wings](https://wings.nopejs.me), a private notes app with a block editor, math, drawings, a local vault folder, and BYOK AI.
+Product documentation for [Wings](https://wings.nopejs.me), a private notes app with lecture transcription, math, drawings, a local vault folder, and BYOK AI.
 
 ## Sign in
 
@@ -30,6 +30,16 @@ Connect a folder on this device (**Chrome or Edge**). New pages can be **Always 
 - Offline **draft cache** keeps recent edits in the browser if the network drops.
 - Empty saves are blocked when the server already has substantial content.
 
+## Lecture Mode
+
+Open a page, then start Lecture Mode from **`/lecture`**, the command palette, or the mic button.
+
+- Records the microphone and transcribes **on this device** with Whisper.
+- First run downloads the model; later runs use the browser cache.
+- Timestamped lines append to the **bottom** of the open page under `## Raw Transcript`.
+- Does not create a new page. Does not overwrite existing notes.
+- Transcription is approximate (classroom noise, accents, jargon).
+
 ## AI (BYOK)
 
 - Open the AI panel with **⌘J** (Ctrl+J).
@@ -56,6 +66,7 @@ Press **⌘?** (Ctrl+?) in the app for the full list.
 | Shortcut | Action |
 |----------|--------|
 | / | Slash commands (line start) |
+| /lecture | Lecture mode |
 | ⌘B / ⌘I / ⌘U / ⌘E | Bold / italic / underline / inline code |
 | ⌘⇧S | Strikethrough |
 | ⌘D | Duplicate block |
@@ -68,6 +79,10 @@ Press **⌘?** (Ctrl+?) in the app for the full list.
 ### How do I sign in to Wings?
 
 Open /auth and use Google OAuth or a magic link email. Auth is Supabase PKCE. There is no third-party Wings API key.
+
+### What is Lecture Mode?
+
+Open a page and start Lecture Mode from /lecture, the command palette, or the mic button. It records the microphone and transcribes on this device with Whisper. The first run downloads the model; later runs use the browser cache. Timestamped lines append to the bottom of the open page under Raw Transcript. It does not create a new page or overwrite existing notes. Transcription is approximate.
 
 ### What is BYOK AI?
 

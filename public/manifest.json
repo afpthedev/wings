@@ -1,7 +1,7 @@
 {
   "name": "Wings",
   "short_name": "Wings",
-  "description": "Block editor for notes with LaTeX math, Excalidraw drawings, and an AI panel.",
+  "description": "Notes with LaTeX math, Excalidraw drawings, on-device lecture transcription, and an AI panel.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",

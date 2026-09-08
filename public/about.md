@@ -1,6 +1,6 @@
 # About · Wings
 
-Wings is a web-based notes app: nested pages, a block editor, LaTeX math, Excalidraw drawings, and an AI panel that reads the page you have open. Pages can be shared by public link or email invite.
+Wings is a web-based notes app: nested pages, LaTeX math, Excalidraw drawings, on-device lecture transcription, and an AI panel that reads the page you have open. Pages can be shared by public link or email invite.
 
 It started after a Notion workspace limit in February 2026 and moved onto a personal React, Vite, Supabase, and TipTap stack in July 2026. The editor runs in the browser. Your pages sync through Supabase. AI calls go to whichever provider you configure. Keys stay in your browser, not on our servers.
 
