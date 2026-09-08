@@ -3,7 +3,7 @@
 import { forwardRef, type ComponentType } from "react";
 import type { LucideProps } from "lucide-react";
 import * as Animated from "@animateicons/react/lucide";
-import { AtSign, ChevronsDownUp, Circle, Columns, Columns3, Cookie, Dot, Eraser, GripVertical, Hash, ListIndentDecrease, ListIndentIncrease, Maximize2, Palette, PanelLeft, Redo2, Scissors, Sigma, Square, Undo2, WrapText } from "lucide-react";
+import { AtSign, ChevronsDownUp, Circle, Columns, Columns3, Cookie, Dot, Eraser, GripVertical, Hash, ListIndentDecrease, ListIndentIncrease, Maximize2, Mic, Palette, PanelLeft, Redo2, Scissors, Sigma, Square, Undo2, WrapText } from "lucide-react";
 
 /** AnimateIcons wrap a div; LucideProps.ref is SVGSVGElement. Drop ref so the types match. */
 export type IconProps = Omit<LucideProps, "ref">;
@@ -160,6 +160,7 @@ export { Hash };
 export const IndentDecrease = ListIndentDecrease;
 export const IndentIncrease = ListIndentIncrease;
 export { Maximize2 };
+export { Mic };
 export { Palette };
 export { PanelLeft };
 export { Redo2 };
