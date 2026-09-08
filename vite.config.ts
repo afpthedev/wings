@@ -11,11 +11,19 @@ export default defineConfig({
     hmr: {
       overlay: false,
     },
+    headers: {
+      "Permissions-Policy": "camera=(), microphone=(self), geolocation=(), browsing-topics=()",
+    },
   },
   plugins: [react(), tailwindcss()],
+  worker: {
+    format: "es",
+  },
   optimizeDeps: {
     include: ["mermaid"],
+    exclude: ["@huggingface/transformers"],
   },
+  assetsInclude: ["**/*.wasm"],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
