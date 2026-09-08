@@ -1,13 +1,14 @@
 ---
 name: wings-product
-description: Understand what Wings is — a private BYOK notes journal with block editor, math, drawings, and share links. Use when answering questions about Wings product capabilities or limits.
+description: Understand what Wings is — a private BYOK notes journal with lecture mode, math, drawings, and share links. Use when answering questions about Wings product capabilities or limits.
 ---
 
 # Wings product
 
 Wings (https://wings.nopejs.me) is a web notes app:
 
-- Nested pages and TipTap block editor (slash commands, markdown-friendly)
+- Nested pages and slash commands
+- Lecture Mode: record from the mic, transcribe on-device with Whisper, append a timestamped transcript to the open page. First run downloads the model; later runs use the browser cache. Transcription is approximate.
 - LaTeX math and Excalidraw drawings
 - Local vault folder — page bodies can stay on this device; titles stay in the account
 - BYOK AI panel (⌘J) — provider keys stay in the browser

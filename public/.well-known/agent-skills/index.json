@@ -4,9 +4,9 @@
     {
       "name": "wings-product",
       "type": "skill-md",
-      "description": "Understand what Wings is — a private BYOK notes journal with block editor, math, drawings, and share links.",
+      "description": "Understand what Wings is — a private BYOK notes journal with lecture mode, math, drawings, and share links.",
       "url": "https://wings.nopejs.me/.well-known/agent-skills/wings-product/SKILL.md",
-      "digest": "sha256:88f82a4ac70a11577c329b34dad893b1315aeba765be29b6b011fee6d66c6b5d"
+      "digest": "sha256:a39b10dc1d8bd41bfcded5c6f8e3ee67e6a0ee4cf14682e04580b83591194882"
     },
     {
       "name": "wings-export",
