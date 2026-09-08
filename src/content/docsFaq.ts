@@ -8,6 +8,11 @@ export const DOCS_FAQ: FaqItem[] = [
       "Open /auth and use Google OAuth or a magic link email. Auth is Supabase PKCE. There is no third-party Wings API key.",
   },
   {
+    question: "What is Lecture Mode?",
+    answer:
+      "Open a page and start Lecture Mode from /lecture, the command palette, or the mic button. It records the microphone and transcribes on this device with Whisper. The first run downloads the model; later runs use the browser cache. Timestamped lines append to the bottom of the open page under Raw Transcript. It does not create a new page or overwrite existing notes. Transcription is approximate.",
+  },
+  {
     question: "What is BYOK AI?",
     answer:
       "Bring-your-own-key. You configure a provider key in the browser. Keys stay local. Prompts go to the provider you choose when you open the AI panel with Cmd+J.",

@@ -6,7 +6,7 @@
 
 <div align="center">
     <h1>Wings</h1>
-    <p>Block editor for notes with nested pages, LaTeX math, Excalidraw drawings, Local vault, and a BYOK AI panel.</p>
+    <p>Notes with nested pages, LaTeX math, Excalidraw drawings, on-device lecture transcription, a local vault, and a BYOK AI panel.</p>
     <p>
         <a href="https://wings.nopejs.me"><img src="https://img.shields.io/website?url=https%3A%2F%2Fwings.nopejs.me&logo=vercel&logoColor=white&label=vercel" alt="Vercel deploy"/></a>
         <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React"/></a>
@@ -33,7 +33,8 @@
 
 ## Features
 
-- Nested pages and a TipTap block editor with slash commands
+- Nested pages and a TipTap editor with slash commands
+- Lecture Mode: record from the mic, transcribe on-device (Whisper), append a timestamped transcript to the open page. first run downloads the model; after that it stays cached in the browser
 - LaTeX math and Excalidraw drawings in the same note
 - BYOK AI panel (⌘J) with page context; keys stay in the browser
 - Public share links and email invites

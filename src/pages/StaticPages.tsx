@@ -8,10 +8,10 @@ export function About() {
       eyebrow="company · about"
       title="what Wings is."
       path="/about"
-      description="Wings is a web notes app with nested pages, a local vault folder, LaTeX, Excalidraw, and a BYOK AI panel. Built for keyboard-first writing."
+      description="Wings is a web notes app with nested pages, lecture mode, a local vault folder, LaTeX, Excalidraw, and a BYOK AI panel. Built for keyboard-first writing."
     >
       <p className="text-muted-foreground">
-        {SITE.brand} is a web-based notes app: nested pages, a block editor, LaTeX math, Excalidraw drawings, and an AI panel that reads the page you have open. Keep private pages in a folder on this device, or share by public link or email invite.
+        {SITE.brand} is a web-based notes app: nested pages, on-device lecture transcription, LaTeX math, Excalidraw drawings, and an AI panel that reads the page you have open. Keep private pages in a folder on this device, or share by public link or email invite.
       </p>
       <p className="text-muted-foreground">
         It started after a Notion workspace limit in February 2026 and moved onto a personal React, Vite, Supabase, and TipTap stack in July 2026. The editor runs in the browser. Cloud pages sync through Supabase. Local vault pages keep the body on a folder you connect — Wings only stores the title so the sidebar still works. AI calls go to whichever provider you configure. Keys stay in your browser, not on our servers.
@@ -80,7 +80,8 @@ export function Roadmap() {
     {
       h: "shipped",
       items: [
-        "block editor with slash commands",
+        "lecture mode (on-device transcription)",
+        "slash commands",
         "LaTeX math & Excalidraw",
         "AI panel + inline edits (⌘J)",
         "local vault folder (page bodies on this device)",
@@ -137,7 +138,7 @@ export function Docs() {
       eyebrow="resources · docs"
       title="using Wings."
       path="/docs"
-      description="Wings docs: sign-in, local vault, sharing, export, BYOK AI, keyboard shortcuts, and FAQ."
+      description="Wings docs: sign-in, lecture mode, local vault, sharing, export, BYOK AI, keyboard shortcuts, and FAQ."
       faq={DOCS_FAQ}
     >
       <p className="text-muted-foreground">
@@ -177,6 +178,11 @@ export function Docs() {
         <li className="text-muted-foreground">▸ empty saves cannot overwrite substantial server content</li>
       </ul>
 
+      <h2 className="text-base font-mono uppercase tracking-tight pt-6">lecture mode</h2>
+      <p className="text-muted-foreground">
+        Open a page, then start Lecture Mode from /lecture, the command palette, or the mic button. Whisper transcribes on this device. The first run downloads the model; later runs use the browser cache. Timestamped lines append to the bottom of the open page under Raw Transcript. It does not create a new page or overwrite existing notes. Transcription is approximate.
+      </p>
+
       <h2 className="text-base font-mono uppercase tracking-tight pt-6">AI (BYOK)</h2>
       <p className="text-muted-foreground">
         Open the AI panel with ⌘J (Ctrl+J). Configure your own provider keys in the browser. Keys stay local; prompts go to the provider you choose.
@@ -206,6 +212,7 @@ export function Docs() {
       <div className="grid sm:grid-cols-2 gap-2 pt-2">
         {[
           ["/", "slash commands (type at line start)"],
+          ["/lecture", "lecture mode"],
           ["⌘B", "bold"],
           ["⌘I", "italic"],
           ["⌘U", "underline"],
@@ -288,7 +295,7 @@ export function Press() {
     >
       <h2 className="text-base font-mono uppercase tracking-tight">boilerplate</h2>
       <p className="text-muted-foreground">
-        Wings is a web notes app with nested pages, a block editor, LaTeX math, Excalidraw drawings, a local vault folder for private page bodies, and a bring-your-own-key AI panel. It is free for features that ship today, open source under AGPL-3.0, and hosted at {SITE.domain}.
+        Wings is a web notes app with nested pages, lecture mode, LaTeX math, Excalidraw drawings, a local vault folder for private page bodies, and a bring-your-own-key AI panel. It is free for features that ship today, open source under AGPL-3.0, and hosted at {SITE.domain}.
       </p>
       <h2 className="text-base font-mono uppercase tracking-tight pt-6">assets</h2>
       <ul className="list-none space-y-2 pl-0">

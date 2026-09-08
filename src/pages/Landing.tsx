@@ -12,8 +12,8 @@ import { Seo } from "@/components/Seo";
 import { LoadingScreen } from "@/components/ui/spinner";
 
 const MARQUEE_FEATURES = [
+  "lecture mode",
   "ask / plan / agent",
-  "block editor",
   "local vault",
   "on this device",
   "latex",
@@ -24,6 +24,7 @@ const MARQUEE_FEATURES = [
 ];
 
 const MARQUEE_SHORTCUTS = [
+  "/lecture",
   "⌘J ai",
   "/ slash",
   "$$ math $$",

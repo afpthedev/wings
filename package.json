@@ -19,7 +19,7 @@
     "recover:entries:apply": "bun run scripts/recover-entries.ts --apply",
     "indexnow": "bun run scripts/indexnow.ts"
   },
-  "description": "Block editor for notes with nested pages, LaTeX math, Excalidraw drawings, and a BYOK AI panel.",
+  "description": "Notes with nested pages, LaTeX math, Excalidraw drawings, on-device lecture transcription, and a BYOK AI panel.",
   "keywords": [
     "notes",
     "block-editor",

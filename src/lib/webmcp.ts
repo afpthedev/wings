@@ -51,7 +51,7 @@ export function registerLandingWebMcp(): () => void {
         name: "Wings",
         url: "https://wings.nopejs.me",
         summary:
-          "Private notes journal with block editor, LaTeX, Excalidraw, and BYOK AI. Sign in at /auth with Google or magic link. No public third-party HTTP API.",
+          "Private notes journal with lecture mode, LaTeX, Excalidraw, and BYOK AI. Sign in at /auth with Google or magic link. No public third-party HTTP API.",
         docs: "https://wings.nopejs.me/docs",
         llmsTxt: "https://wings.nopejs.me/llms.txt",
       }),

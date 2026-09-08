@@ -28,7 +28,7 @@ Wings is still a small project. The editor runs in the browser. Pages sync throu
 
 ## What is Wings today?
 
-Wings is a web notes app with nested pages, a block editor, LaTeX math, Excalidraw drawings, share links, markdown export, and a BYOK AI panel. Sign in with Google or a magic link. The source is AGPL-3.0 on [GitHub](https://github.com/Sabique-Islam/wings).
+Wings is a web notes app with nested pages, lecture mode, LaTeX math, Excalidraw drawings, share links, markdown export, and a BYOK AI panel. Sign in with Google or a magic link. The source is AGPL-3.0 on [GitHub](https://github.com/Sabique-Islam/wings).
 
 If you want the short version: it is a keyboard-first notes corner that refuses to be a proprietary format trap.
 

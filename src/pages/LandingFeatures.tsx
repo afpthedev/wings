@@ -19,15 +19,15 @@ export default function LandingFeatures() {
       <Seo
         title="features"
         path="/features"
-        description="Wings features: block editor, local vault folder, LaTeX math, Excalidraw, Ask / Plan / Agent AI, sharing, and collab."
+        description="Wings features: lecture mode, local vault folder, LaTeX math, Excalidraw, Ask / Plan / Agent AI, sharing, and collab."
       />
       <MarketingLayout>
         <main>
-          <InfiniteMarquee items={["ask / plan / agent", "block editor", "local vault", "on this device", "latex", "excalidraw", "databases", "wikilinks", "collab"]} />
+          <InfiniteMarquee items={["lecture mode", "ask / plan / agent", "local vault", "on this device", "latex", "excalidraw", "databases", "wikilinks", "collab"]} />
           <StripeDivider />
           <FeatureGrid />
           <StripeDivider />
-          <InfiniteMarquee reverse items={["⌘J ai", "/ slash", "$$ math $$", "[[]] wiki", "✎ drawings", "↗ /s/", "⌘K palette"]} />
+          <InfiniteMarquee reverse items={["/lecture", "⌘J ai", "/ slash", "$$ math $$", "[[]] wiki", "✎ drawings", "↗ /s/", "⌘K palette"]} />
           <StripeDivider />
           <LandingCta />
         </main>

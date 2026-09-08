@@ -7,7 +7,8 @@ export const PRICING_TIERS = [
     tagline: "everything available today.",
     features: [
       "unlimited pages & nesting",
-      "block editor + slash commands",
+      "lecture mode (on-device transcription)",
+      "slash commands",
       "LaTeX math & Excalidraw",
       "AI panel (your API key)",
       "local vault folder (page bodies on this device)",
@@ -56,7 +57,7 @@ export type PricingTier = (typeof PRICING_TIERS)[number];
 /** Features that ship in the app today — all on the free tier. */
 export const INCLUDED_TODAY = [
   "nested pages with sidebar search",
-  "block editor — headings, lists, tasks, tables, code, callouts",
+  "lecture mode — record, transcribe on-device, append to the open page",
   "LaTeX math ($…$ and $$…$$)",
   "Excalidraw drawings inline or in a modal",
   "AI panel with your own provider key (⌘J)",

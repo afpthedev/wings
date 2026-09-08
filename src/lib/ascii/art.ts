@@ -9,7 +9,7 @@ export const WINGS_WORDMARK = `
   ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝
 `;
 
-export const WINGS_TAGLINE = "notes, math, drawings, and ai";
+export const WINGS_TAGLINE = "notes, lectures, math, drawings, and ai";
 
 export const WINGS_MARK_COMPACT = `┌──────────────────────┐
 │  ◼  wings · write    │
@@ -57,15 +57,13 @@ export function asciiBox(title: string, rows: string[]): string {
 }
 
 /** Showcase sticky-scroll panels — ASCII-only, programmatically aligned. */
-export const SHOWCASE_WRITING = asciiBox("workspace", [
-  "> inbox",
-  "  - daily notes              [*]",
+export const SHOWCASE_LECTURE = asciiBox("lecture", [
+  "  (*) rec          00:42:18",
   "",
-  "| blocks, not boxes.",
+  "  [00:12] CAP theorem says",
+  "  [00:19] you pick two.",
   "",
-  "  /table   $latex$   ~ sketch",
-  "",
-  "drag . nest . transform",
+  "  whisper . on this device",
 ]);
 
 export const SHOWCASE_THINKING = asciiBox("agent ^J", [
@@ -99,7 +97,7 @@ export const SHOWCASE_SHARING = asciiBox("publish", [
 ]);
 
 export const SHOWCASE_BY_TAG: Record<string, string> = {
-  writing: SHOWCASE_WRITING,
+  lecture: SHOWCASE_LECTURE,
   thinking: SHOWCASE_THINKING,
   keeping: SHOWCASE_KEEPING,
   sharing: SHOWCASE_SHARING,

@@ -18,7 +18,7 @@ export default function LandingShowcase() {
       <Seo
         title="showcase"
         path="/showcase"
-        description="See how Wings handles blocks, a local vault on this device, AI with Ask / Plan / Agent, and sharing by link or invite."
+        description="See how Wings handles lecture mode, a local vault on this device, AI with Ask / Plan / Agent, and sharing by link or invite."
       />
       <MarketingLayout>
         <main>
