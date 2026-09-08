@@ -53,6 +53,7 @@ interface BlockEditorExtensionHandlers {
   onEmbedPage?: () => void;
   onNewPage?: (title: string) => void;
   onAskAI?: () => void;
+  onLecture?: () => void;
   getPages?: () => PageOption[];
   getPagePreview?: (pageId: string) => PagePreview | null;
 }
@@ -214,6 +215,7 @@ export function createBlockEditorExtensions(handlers: BlockEditorExtensionOption
       onEmbedPage: () => handlers.onEmbedPage?.(),
       onNewPage: (title: string) => handlers.onNewPage?.(title),
       onAskAI: () => handlers.onAskAI?.(),
+      onLecture: () => handlers.onLecture?.(),
     }),
     ...pageSuggestions,
     ...extraExtensions,

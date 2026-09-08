@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Plus, Settings, Share2, Sparkles, PanelLeft, Pin, Copy, LayoutList, Trash2 } from "@/lib/icons";
+import { FileText, Plus, Settings, Share2, Sparkles, PanelLeft, Pin, Copy, LayoutList, Trash2, Mic } from "@/lib/icons";
 import {
   CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut,
 } from "@/components/ui/command";
@@ -71,6 +71,9 @@ export function CommandPalette({
           </CommandItem>
           <CommandItem onSelect={() => run(() => window.dispatchEvent(new CustomEvent("nw:openAI")))}>
             <Sparkles className="mr-2" /> open AI assistant <CommandShortcut>⌘J</CommandShortcut>
+          </CommandItem>
+          <CommandItem onSelect={() => run(() => window.dispatchEvent(new CustomEvent("nw:lecture")))}>
+            <Mic className="mr-2" /> start lecture mode
           </CommandItem>
           <CommandItem onSelect={() => run(() => onOpenTrash?.())}>
             <Trash2 className="mr-2" /> open trash

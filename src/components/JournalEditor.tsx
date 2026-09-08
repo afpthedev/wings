@@ -5,7 +5,7 @@ import { buildPagePreview, refreshPageEmbeds } from "@/components/BlockEditor/Pa
 import type { EditorChangePayload } from "@/lib/editorPayload";
 import { useCollabProvider } from "@/lib/collab/useCollabProvider";
 import { useAuth } from "@/hooks/useAuth";
-import { Trash2, PanelLeft, Download, Pin, PinOff, FilePlus, History, Keyboard, Sparkles, PenTool, Hash, Upload, FileJson, FileText, Lock, Cloud } from "@/lib/icons";
+import { Trash2, PanelLeft, Download, Pin, PinOff, FilePlus, History, Keyboard, Sparkles, PenTool, Hash, Upload, FileJson, FileText, Lock, Cloud, Mic } from "@/lib/icons";
 import { EmptyStateAscii } from "@/components/AsciiAnimation";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
 import { BlockEditor } from "@/components/BlockEditor/BlockEditor";
@@ -56,6 +56,7 @@ interface Props {
   onNewSubpageWithTitle: (parentId: string, title: string) => Promise<void>;
   onRestoreVersion: (entryId: string, versionId: string) => Promise<void>;
   onOpenAI: () => void;
+  onOpenLecture?: () => void;
   onImported?: () => void;
   onNew?: () => void;
   onPromoteToCloud?: (entryId: string, payload: EditorChangePayload) => Promise<void>;
@@ -69,7 +70,7 @@ function canEditRole(role: ShareRole): boolean {
   return role === "owner" || role === "admin" || role === "editor";
 }
 
-export function JournalEditor({ entry, allEntries = [], roleMap = {}, userId, onChange, onTitleChange, onDelete, onTogglePin, sidebarOpen, onToggleSidebar, breadcrumbTrail, onNavigate, onNewSubpage, onUpdateEntry, userRole, onNewSubpageWithTitle, onRestoreVersion, onOpenAI, onImported, onNew, onPromoteToCloud, saveStatus = "idle", collabEnabled = false }: Props) {
+export function JournalEditor({ entry, allEntries = [], roleMap = {}, userId, onChange, onTitleChange, onDelete, onTogglePin, sidebarOpen, onToggleSidebar, breadcrumbTrail, onNavigate, onNewSubpage, onUpdateEntry, userRole, onNewSubpageWithTitle, onRestoreVersion, onOpenAI, onOpenLecture, onImported, onNew, onPromoteToCloud, saveStatus = "idle", collabEnabled = false }: Props) {
   const { user } = useAuth();
   const { appearance } = useEditorAppearance();
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -378,6 +379,15 @@ export function JournalEditor({ entry, allEntries = [], roleMap = {}, userId, on
               >
                 <Hash className="h-3.5 w-3.5" />
               </button>
+              {canEdit && onOpenLecture && (
+                <button
+                  onClick={onOpenLecture}
+                  className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors"
+                  title="Lecture Mode"
+                >
+                  <Mic className="h-3.5 w-3.5" />
+                </button>
+              )}
               <button
                 onClick={onOpenAI}
                 className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors"
@@ -501,6 +511,7 @@ export function JournalEditor({ entry, allEntries = [], roleMap = {}, userId, on
                 onEmbedPage={canEdit ? handleEmbedPage : undefined}
                 onNewPage={canEdit ? handleNewPage : undefined}
                 onAskAI={canEdit ? onOpenAI : undefined}
+                onLecture={canEdit ? onOpenLecture : undefined}
                 pages={pages}
                 getPagePreview={getPagePreview}
                 editable={canEdit}

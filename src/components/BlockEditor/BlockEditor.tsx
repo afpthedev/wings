@@ -52,6 +52,7 @@ interface Props {
   onEmbedPage?: () => void;
   onNewPage?: (title: string) => void;
   onAskAI?: () => void;
+  onLecture?: () => void;
   pages?: PageOption[];
   getPagePreview?: (pageId: string) => PagePreview | null;
   editable?: boolean;
@@ -98,6 +99,7 @@ export const BlockEditor = memo(function BlockEditor({
   onEmbedPage,
   onNewPage,
   onAskAI,
+  onLecture,
   pages = [],
   getPagePreview,
   editable = true,
@@ -157,6 +159,7 @@ export const BlockEditor = memo(function BlockEditor({
         onEmbedPage: isPeek ? undefined : onEmbedPage,
         onNewPage: isPeek ? undefined : onNewPage,
         onAskAI: isPeek ? undefined : onAskAI,
+        onLecture: isPeek ? undefined : onLecture,
         getPages: pages.length > 0 ? () => pagesRef.current : undefined,
         getPagePreview: (pageId) => getPagePreviewRef.current?.(pageId) ?? null,
         collab: !!liveCollab,
@@ -167,6 +170,7 @@ export const BlockEditor = memo(function BlockEditor({
       liveCollab,
       extraExtensions,
       onAskAI,
+      onLecture,
       onImageUpload,
       onLinkPage,
       onEmbedPage,

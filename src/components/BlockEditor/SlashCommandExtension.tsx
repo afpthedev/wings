@@ -15,7 +15,7 @@ import {
   Code2, Image, Type, AlertCircle, ChevronRight, ChevronUp, ChevronDown, FileText, Table,
   Link as LinkIcon, ExternalLink, Columns, Sigma, Calculator, Calendar, CalendarCheck,
   Sparkles, FilePlus2, Layout, PenLine, BookOpen, Table2, RefreshCw,
-  Copy, Trash2, Bold, Italic, Underline, Plus,
+  Copy, Trash2, Bold, Italic, Underline, Plus, Mic,
 } from "@/lib/icons";
 import { TEMPLATES } from "@/lib/templates";
 import {
@@ -44,6 +44,7 @@ interface SlashHandlers {
   onEmbedPage?: () => void;
   onNewPage?: (title: string) => void;
   onAskAI?: () => void;
+  onLecture?: () => void;
 }
 
 function insertSlashDate(editor: { chain: () => any }, range: { from: number; to: number }, kind: "today" | "tomorrow" | "yesterday" | "now") {
@@ -73,6 +74,17 @@ const getSuggestionItems = (h: SlashHandlers = {}): CommandItem[] => [
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).run();
       h.onAskAI?.();
+    },
+  },
+  {
+    title: "Lecture Mode",
+    description: "Record a lecture and transcribe into this page",
+    icon: Mic,
+    category: "Lecture",
+    aliases: ["lecture", "dictate", "record", "transcribe"],
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).run();
+      h.onLecture?.();
     },
   },
   {
