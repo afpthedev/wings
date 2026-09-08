@@ -13,9 +13,9 @@ type CardData = {
 
 const CARDS: CardData[] = [
   {
-    tag: "writing",
-    title: "blocks you can move.",
-    body: "each paragraph, heading, or embed is its own block. drag to reorder, nest sub-pages in the sidebar, pin favorites, and soft-delete to trash.",
+    tag: "lecture",
+    title: "mic on. notes appear.",
+    body: "lecture mode records from the microphone and writes a timestamped transcript at the end of the open page. whisper stays on this device. it does not create a new page, and it does not overwrite what you already wrote.",
   },
   {
     tag: "thinking",
@@ -40,7 +40,7 @@ export function StackedScroll() {
       <LinedHeading
         eyebrow="— showcase"
         title={<>how it feels<br className="hidden sm:block" /> in the app.</>}
-        subtitle="writing, thinking, keeping, and sharing — the same motions, now with the blocks that actually ship."
+        subtitle="record a lecture, ask the page, keep it local, share when you want."
       />
       <StripeDivider />
       <LinedGrid cols={2}>

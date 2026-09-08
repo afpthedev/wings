@@ -23,7 +23,7 @@ export function LandingCta({ ctaHref = "/auth" }: Props) {
           try it — it's free.
         </motion.h2>
         <p className="text-sm sm:text-base text-ink-1 font-sans max-w-md mx-auto leading-relaxed">
-          private pages can stay in a folder on this device. cloud is opt-in when you share.
+          hit /lecture, talk, and the transcript lands at the bottom of the page. private notes can stay in a folder on this device.
         </p>
         <Link
           to={ctaHref}

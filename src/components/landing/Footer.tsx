@@ -15,7 +15,7 @@ export function Footer() {
         <div className="space-y-3">
           <Logo size={28} withWordmark wordmarkClassName="text-sm" />
           <p className="text-xs text-ink-2 font-mono leading-relaxed">
-            block editor for notes. keep page bodies in a folder on this device — or in the cloud when you share.
+            record a lecture into the page. keep bodies in a folder on this device — or in the cloud when you share.
           </p>
           <div className="flex items-center gap-2 pt-1">
             <a href={SOCIAL.discord} target="_blank" rel="noreferrer" aria-label="discord" className="w-8 h-8 grid place-items-center border border-line hover:bg-accent/40 transition-colors">

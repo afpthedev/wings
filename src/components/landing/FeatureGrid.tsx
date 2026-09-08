@@ -15,10 +15,10 @@ type ShowcaseFeature = {
 
 const SHOWCASE: ShowcaseFeature[] = [
   {
-    t: "compose",
-    headline: "block editor",
-    d: "headings, lists, tasks, tables, code, callouts, toggles, and two- or three-column layouts. type / for slash commands or use markdown shortcuts.",
-    tag: "/  →  table",
+    t: "record",
+    headline: "lecture mode",
+    d: "start recording in a page. whisper runs on this device — first time it downloads the model, then it's cached. live transcript appends to the bottom of the note with timestamps. not 100% accurate; classroom noise and accents will bite.",
+    tag: "/lecture",
     graphic: "gyro",
   },
   {
@@ -50,9 +50,8 @@ const MORE: CompactFeature[] = [
   { t: "math & drawings", d: "inline $…$ or block $$…$$. insert an Excalidraw block or open the full canvas. scenes save with the page.", a: "Σ  +  ✎" },
   { t: "connected blocks", d: "databases, synced blocks, wiki links, page embeds, and web bookmarks. paste a URL for a preview; embed YouTube or Figma.", a: "[[]]" },
   { t: "versions", d: "open version history on a page and restore an earlier snapshot without leaving the editor.", a: "↺ history" },
-  { t: "keyboard", d: "⌘K command palette, ⌘N new page, ⌘P quick switcher, ⌘B sidebar, ⌘/ sidebar search, / slash.", a: "⌘K" },
+  { t: "keyboard", d: "⌘K command palette, ⌘N new page, ⌘P quick switcher, ⌘B sidebar, ⌘/ sidebar search, / slash, /lecture.", a: "⌘K" },
   { t: "drafts & export", d: "unsaved edits live in the browser. if the network drops, Wings retries the write. export markdown or JSON, download a zip of the vault layout, or import a Notion dump.", a: "↓  ↑" },
-  { t: "columns & media", d: "two- or three-column layouts, floating images, callouts, toggles, and syntax-highlighted code.", a: "≡  ▦" },
 ];
 
 export function FeatureGrid() {

@@ -4,7 +4,7 @@ import { ArrowRight } from "@/lib/icons";
 import { motionEase } from "./constants";
 import { HeroScreenshot } from "./HeroScreenshot";
 import { AsciiWordmark } from "@/lib/ascii";
-
+import { SITE } from "@/config/site";
 import { StripeDivider } from "./LinedShell";
 
 interface Props { ctaHref: string }
@@ -27,7 +27,7 @@ export function Hero({ ctaHref }: Props) {
           className="font-display font-bold text-4xl sm:text-5xl md:text-7xl lg:text-[5.5rem] tracking-[-0.045em] leading-[0.92]"
         >
           write pages.<br />
-          add <span className="text-accent-strong">math & drawings.</span>
+          record the <span className="text-accent-strong">lecture.</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
@@ -35,7 +35,7 @@ export function Hero({ ctaHref }: Props) {
           transition={{ duration: 0.9, delay: 0.2, ease: motionEase }}
           className="text-sm sm:text-base md:text-lg text-ink-1 font-sans max-w-2xl mx-auto leading-relaxed px-2"
         >
-          Block editor for nested pages with LaTeX math, Excalidraw drawings, and an AI panel. Keep page bodies in a local vault on this device, or share by link. Export markdown.
+          {SITE.description}
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 12 }}
