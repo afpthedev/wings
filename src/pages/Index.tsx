@@ -51,6 +51,7 @@ import { KeyboardPalette } from "@/components/KeyboardPalette";
 import { GraphView } from "@/components/GraphView";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { AIAssistant } from "@/components/AIAssistant";
+import { LectureModePanel } from "@/components/LectureModePanel";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingScreen } from "@/components/ui/spinner";
@@ -136,6 +137,7 @@ export default function Index() {
     }
   });
   const [aiOpen, setAiOpen] = useState(false);
+  const [lectureOpen, setLectureOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   // Distinct from `loading`: the cached paint clears `loading` early, but a
   // page missing from the mirror is not yet proof the page is gone.
@@ -1037,6 +1039,12 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
+    const open = () => setLectureOpen(true);
+    window.addEventListener("nw:lecture", open);
+    return () => window.removeEventListener("nw:lecture", open);
+  }, []);
+
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key === "j") {
@@ -1049,6 +1057,7 @@ export default function Index() {
   }, []);
 
   const openAI = useCallback(() => setAiOpen(true), []);
+  const openLecture = useCallback(() => setLectureOpen(true), []);
 
   const tabTitle = isTrashRoute
     ? "trash"
@@ -1141,6 +1150,7 @@ export default function Index() {
         onNewSubpageWithTitle={handleNewSubpageWithTitle}
         onRestoreVersion={handleRestoreVersion}
         onOpenAI={openAI}
+        onOpenLecture={openLecture}
         onNew={handleNew}
         onImported={() => void loadEntries()}
         onPromoteToCloud={handlePromoteToCloud}
@@ -1175,6 +1185,17 @@ export default function Index() {
         allEntries={entries}
         onCreateEntry={handleEntryCreated}
         onNavigate={setActiveId}
+      />
+      <LectureModePanel
+        open={lectureOpen}
+        onClose={() => setLectureOpen(false)}
+        hasPage={Boolean(activeEntry)}
+        canEdit={
+          !activeId ||
+          (roleMap[activeId] || "owner") === "owner" ||
+          (roleMap[activeId] || "owner") === "admin" ||
+          (roleMap[activeId] || "owner") === "editor"
+        }
       />
       <CollectionEditorDialog
         open={collectionDraft != null}

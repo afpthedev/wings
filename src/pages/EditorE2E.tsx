@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BlockEditor } from "@/components/BlockEditor/BlockEditor";
 import { PagePeekHost } from "@/components/PagePeekHost";
+import { LectureModePanel } from "@/components/LectureModePanel";
 import { htmlToMarkdown } from "@/lib/markdown";
 import { requestEditorSerialize, type EditorChangePayload } from "@/lib/editorPayload";
 import { patchEditorAppearance } from "@/lib/editorAppearance";
@@ -31,6 +32,7 @@ export default function EditorE2E() {
   /** Bumped to remount the editor from markdown alone, as a cold load would. */
   const [mount, setMount] = useState(0);
   const [peekNavigated, setPeekNavigated] = useState("");
+  const [lectureOpen, setLectureOpen] = useState(false);
 
   const peekEntries = useMemo(
     () =>
@@ -55,6 +57,14 @@ export default function EditorE2E() {
     setAiText(requestMarkdown);
   }, []);
 
+  const openLecture = useCallback(() => setLectureOpen(true), []);
+
+  useEffect(() => {
+    const open = () => setLectureOpen(true);
+    window.addEventListener("nw:lecture", open);
+    return () => window.removeEventListener("nw:lecture", open);
+  }, []);
+
   return (
     <main className="min-h-screen bg-background text-foreground p-6">
       <div className="max-w-3xl mx-auto border border-border rounded-md min-h-[360px] p-4">
@@ -66,6 +76,7 @@ export default function EditorE2E() {
           pages={pages}
           getPagePreview={getE2EPagePreview}
           onNewPage={setRequestedPage}
+          onLecture={openLecture}
         />
         <PagePeekHost
           entries={peekEntries}
@@ -74,6 +85,12 @@ export default function EditorE2E() {
           onNavigate={setPeekNavigated}
         />
       </div>
+      <LectureModePanel
+        open={lectureOpen}
+        onClose={() => setLectureOpen(false)}
+        hasPage
+        canEdit
+      />
       <button type="button" data-testid="reload-from-markdown" onClick={() => setMount((m) => m + 1)}>
         reload from markdown
       </button>
