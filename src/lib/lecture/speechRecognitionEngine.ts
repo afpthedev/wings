@@ -29,10 +29,11 @@ function speechRecognitionCtor(): (new () => BrowserSpeechRecognition) | undefin
 }
 
 function recognitionLang(language: LectureLanguage): string {
+  if (language === "tr") return "tr-TR";
   if (language === "hi") return "hi-IN";
   if (language === "kn") return "kn-IN";
   if (language === "en") return "en-US";
-  return navigator.language || "en-US";
+  return navigator.language || "tr-TR";
 }
 
 export function createSpeechRecognitionEngine(language: LectureLanguage): LectureEngine {

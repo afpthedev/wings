@@ -25,7 +25,6 @@ function getModelContext(): ModelContextApi | null {
 
 const MARKETING_PATHS: Record<string, string> = {
   home: "/",
-  pricing: "/pricing",
   docs: "/docs",
   about: "/about",
   roadmap: "/roadmap",

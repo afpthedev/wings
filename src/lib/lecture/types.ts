@@ -1,7 +1,7 @@
-export type LectureLanguage = "auto" | "en" | "hi" | "kn";
-export type QualityMode = "fast" | "balanced";
-export type TranscriptionEngineId = "whisper" | "speech" | "none";
-export type EnginePreference = "whisper" | "speech";
+export type LectureLanguage = "auto" | "tr" | "en" | "hi" | "kn";
+export type QualityMode = "fast" | "balanced" | "accurate" | "turbo";
+export type TranscriptionEngineId = "whisper" | "speech" | "gemini" | "none";
+export type EnginePreference = "whisper" | "speech" | "gemini";
 
 export type TranscriptChunk = {
   id: string;
@@ -60,12 +60,15 @@ export type LectureEngine = {
 };
 
 export const WHISPER_MODELS: Record<QualityMode, { id: string; label: string; bytes: number }> = {
-  fast: { id: "onnx-community/whisper-tiny", label: "Fast", bytes: 41_000_000 },
-  balanced: { id: "onnx-community/whisper-base", label: "Balanced", bytes: 78_000_000 },
+  fast: { id: "onnx-community/whisper-tiny", label: "Fast (Tiny)", bytes: 41_000_000 },
+  balanced: { id: "onnx-community/whisper-base", label: "Balanced (Base)", bytes: 78_000_000 },
+  accurate: { id: "onnx-community/whisper-small", label: "High Quality (Small)", bytes: 240_000_000 },
+  turbo: { id: "onnx-community/whisper-large-v3-turbo", label: "Large v3 Turbo (SOTA)", bytes: 480_000_000 },
 };
 
 export const LANGUAGE_LABELS: Record<LectureLanguage, string> = {
   auto: "Auto detect",
+  tr: "Türkçe (Turkish)",
   en: "English",
   hi: "Hindi",
   kn: "Kannada",

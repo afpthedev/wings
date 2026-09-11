@@ -1,5 +1,4 @@
-// Ask / Plan / Agent — Cursor-style modes so the panel does not write
-// unless the user explicitly chose Agent.
+import { formatToolsSystemPrompt } from "./tools/registry";
 
 export type AssistantMode = "ask" | "plan" | "agent";
 
@@ -92,7 +91,9 @@ ${NO_TOOLS}`;
   }
   return `${SHARED}
 
-You are in Agent mode.
+You are in Agent mode with full workspace and task management autonomy.
+${formatToolsSystemPrompt()}
+
 ${TOOL_PROTOCOL}`;
 }
 

@@ -54,3 +54,7 @@ Thumbs.db
 *.pem
 .cache/
 .originkit/
+
+# Workspace user files (persisted on server volume)
+workspace/*
+!workspace/.gitkeep

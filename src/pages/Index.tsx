@@ -56,6 +56,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingScreen } from "@/components/ui/spinner";
 import { Seo } from "@/components/Seo";
+import { FileViewer } from "@/components/FileExplorer/FileViewer";
+import { TasksView } from "@/components/Tasks/TasksView";
 
 function resolveEntryOwnerId(
   parentId: string | undefined,
@@ -123,6 +125,7 @@ export default function Index() {
   }>();
   const basePath = username ? `/${username}` : location.pathname.startsWith("/app") ? "/app" : "";
   const isTrashRoute = location.pathname === `${basePath}/trash` || location.pathname === "/trash";
+  const isTasksRoute = location.pathname === `${basePath}/tasks` || location.pathname === "/tasks";
   const [entries, setEntries] = useState<Entry[]>([]);
   const [collections, setCollections] = useState<CollectionInfo[]>([]);
   const [collectionDraft, setCollectionDraft] = useState<CollectionInfo | null>(null);
@@ -138,6 +141,10 @@ export default function Index() {
   });
   const [aiOpen, setAiOpen] = useState(false);
   const [lectureOpen, setLectureOpen] = useState(false);
+  const [sidebarMode, setSidebarMode] = useState<"notes" | "tasks" | "files">(() =>
+    isTasksRoute ? "tasks" : "notes"
+  );
+  const [activeServerFilePath, setActiveServerFilePath] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   // Distinct from `loading`: the cached paint clears `loading` early, but a
   // page missing from the mirror is not yet proof the page is gone.
@@ -175,26 +182,63 @@ export default function Index() {
 
   const setActiveId = useCallback((id: string | null) => {
     setActiveIdRaw(id);
+    if (id) {
+      setSidebarMode("notes");
+      setActiveServerFilePath(null);
+    }
     navigate(id ? `${basePath}/n/${id}` : basePath || "/app");
   }, [navigate, basePath]);
 
   const openTrash = useCallback(() => {
     setActiveIdRaw(null);
+    setActiveServerFilePath(null);
     navigate(`${basePath}/trash`);
   }, [navigate, basePath]);
 
   const openCollection = useCallback((id: string) => {
     setActiveIdRaw(null);
+    setActiveServerFilePath(null);
     navigate(`${basePath}/c/${id}`);
   }, [navigate, basePath]);
 
+  const openTasks = useCallback(() => {
+    setActiveIdRaw(null);
+    setActiveServerFilePath(null);
+    setSidebarMode("tasks");
+    navigate(`${basePath}/tasks`);
+  }, [navigate, basePath]);
+
+  const handleSidebarModeChange = useCallback(
+    (mode: "notes" | "tasks" | "files") => {
+      setSidebarMode(mode);
+      setActiveServerFilePath(null);
+      if (mode === "tasks") {
+        setActiveIdRaw(null);
+        navigate(`${basePath}/tasks`);
+      } else if (mode === "notes") {
+        if (location.pathname.endsWith("/tasks")) {
+          navigate(basePath || "/app");
+        }
+      }
+    },
+    [navigate, basePath, location.pathname]
+  );
+
   useEffect(() => {
-    if (isTrashRoute || collectionId) {
+    if (isTasksRoute) {
+      setSidebarMode("tasks");
+      setActiveServerFilePath(null);
+      setActiveIdRaw(null);
+    }
+  }, [isTasksRoute]);
+
+  useEffect(() => {
+    if (isTrashRoute || collectionId || isTasksRoute) {
       setActiveIdRaw(null);
       return;
     }
     setActiveIdRaw(routeId ?? null);
-  }, [routeId, collectionId, isTrashRoute]);
+  }, [routeId, collectionId, isTrashRoute, isTasksRoute]);
 
   useEffect(() => {
     if (!userId) return;
@@ -1090,14 +1134,20 @@ export default function Index() {
         roleMap={roleMap}
         userId={user?.id || ""}
         activeId={activeId}
-        onSelect={setActiveId}
+        onSelect={(id) => {
+          setActiveId(id);
+          setActiveServerFilePath(null);
+        }}
         onNew={handleNew}
         sidebarOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(false)}
+        onToggle={toggleSidebar}
         collapsed={sidebarCollapsed}
         onCollapsedChange={setSidebarCollapsed}
-        onRefetch={() => void loadEntries({ refreshShares: true }).catch((err) => toast.error("Couldn't refresh pages", { description: entryErrorMessage(err) }))}
-        onHome={() => setActiveId(null)}
+        onRefetch={() => void loadEntries({ refreshShares: true })}
+        onHome={() => {
+          setActiveId(null);
+          setActiveServerFilePath(null);
+        }}
         onReorder={handleReorderPages}
         onMove={handleMovePage}
         onDelete={handleDelete}
@@ -1105,7 +1155,7 @@ export default function Index() {
         collections={collections}
         activeCollectionId={collectionId ?? null}
         trashActive={isTrashRoute}
-        overviewActive={!activeId && !collectionId && !isTrashRoute}
+        overviewActive={!activeId && !collectionId && !isTrashRoute && !activeServerFilePath && !isTasksRoute && sidebarMode === "notes"}
         onOpenTrash={openTrash}
         onOpenCollection={openCollection}
         onCreateCollection={() => setCollectionDraft({ id: "", name: "", rules: { filters: [] }, allowList: [] })}
@@ -1115,8 +1165,30 @@ export default function Index() {
         }}
         onDeleteCollection={handleDeleteCollection}
         onAddToCollection={handleAddToCollection}
+        sidebarMode={sidebarMode}
+        onSidebarModeChange={handleSidebarModeChange}
+        activeServerFilePath={activeServerFilePath}
+        onSelectServerFile={(path) => {
+          setActiveServerFilePath(path);
+          setActiveId(null);
+        }}
       />
-      {isTrashRoute ? (
+      {sidebarMode === "tasks" || isTasksRoute ? (
+        <TasksView
+          entries={entries}
+          userId={user?.id}
+          onNavigate={(id) => {
+            setActiveId(id);
+            setSidebarMode("notes");
+          }}
+          onToggleSidebar={toggleSidebar}
+        />
+      ) : activeServerFilePath ? (
+        <FileViewer
+          filePath={activeServerFilePath}
+          onClose={() => setActiveServerFilePath(null)}
+        />
+      ) : isTrashRoute ? (
         <TrashView
           userId={user?.id || ""}
           onToggleSidebar={toggleSidebar}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, type ComponentType } from "react";
 import {
   X, Sun, Moon, Monitor, User, Palette, Sparkles, Plug, Bell, Download,
-  CreditCard, AlertTriangle, Eye, EyeOff, Check, Github, MessageCircle,
+  AlertTriangle, Eye, EyeOff, Check, Github, MessageCircle,
   type IconProps,
 } from "@/lib/icons";
 import { useTheme } from "./ThemeProvider";
@@ -42,7 +42,7 @@ const PRESET_COLORS = [
   "#22c55e", "#14b8a6", "#06b6d4", "#3b82f6",
 ];
 
-type TabId = "account" | "appearance" | "ai" | "connections" | "notifications" | "data" | "billing" | "danger";
+type TabId = "account" | "appearance" | "ai" | "connections" | "notifications" | "data" | "danger";
 
 const TABS: { id: TabId; label: string; icon: ComponentType<IconProps> }[] = [
   { id: "account", label: "account", icon: User },
@@ -51,7 +51,6 @@ const TABS: { id: TabId; label: string; icon: ComponentType<IconProps> }[] = [
   { id: "connections", label: "connections", icon: Plug },
   { id: "notifications", label: "notifications", icon: Bell },
   { id: "data", label: "import / export", icon: Download },
-  { id: "billing", label: "billing", icon: CreditCard },
   { id: "danger", label: "danger zone", icon: AlertTriangle },
 ];
 
@@ -667,16 +666,6 @@ export function SettingsPanel() {
 
             {tab === "data" && (
               <VaultSettings userId={user?.id ?? null} />
-            )}
-
-            {tab === "billing" && (
-              <div className="space-y-3">
-                <div className="rounded-lg border border-border-subtle p-4">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-ink-2">current plan</div>
-                  <div className="text-2xl font-display font-bold mt-1">Free</div>
-                </div>
-                <Link to="/pricing" className="inline-flex rounded-md bg-accent-strong text-accent-strong-foreground text-xs font-mono px-4 py-2 hover:bg-accent-strong-hover transition-colors">view plans →</Link>
-              </div>
             )}
 
             {tab === "danger" && (

@@ -30,13 +30,19 @@ function noneEngine(): LectureEngine {
 }
 
 export async function createLectureEngine(options: {
-  preference: "whisper" | "speech";
+  preference: "whisper" | "speech" | "gemini";
   caps: LectureCapabilities;
   quality: QualityMode;
   language: LectureLanguage;
 }): Promise<LectureEngine> {
   if (override) return override;
   const resolved = resolveTranscriptionEngine(options.preference, options.caps);
+  if (resolved.engine === "gemini") {
+    const { createGeminiAudioEngine } = await import("./geminiAudioEngine");
+    return createGeminiAudioEngine({
+      language: options.language,
+    });
+  }
   if (resolved.engine === "whisper") {
     const { createWhisperEngine } = await import("./whisperEngine");
     return createWhisperEngine({

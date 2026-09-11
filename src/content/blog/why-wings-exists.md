@@ -40,7 +40,7 @@ No. It borrows familiar block-editor patterns (slash commands, nested pages) but
 
 ### Is Wings free?
 
-Yes for the features that ship today. Paid plans for hosted AI credits are planned and not live yet. See [pricing](https://wings.nopejs.me/pricing).
+Yes. Wings is open source under AGPL-3.0 and all editor features, local vault, and BYOK AI are completely free.
 
 ### Where do I start?
 

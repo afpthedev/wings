@@ -10,15 +10,15 @@ const DEFAULT_PREFS: LecturePrefs = {
 };
 
 function isLanguage(value: unknown): value is LecturePrefs["language"] {
-  return value === "auto" || value === "en" || value === "hi" || value === "kn";
+  return value === "auto" || value === "tr" || value === "en" || value === "hi" || value === "kn";
 }
 
 function isQuality(value: unknown): value is LecturePrefs["quality"] {
-  return value === "fast" || value === "balanced";
+  return value === "fast" || value === "balanced" || value === "accurate" || value === "turbo";
 }
 
 function isEngine(value: unknown): value is LecturePrefs["engine"] {
-  return value === "whisper" || value === "speech";
+  return value === "whisper" || value === "speech" || value === "gemini";
 }
 
 export function getLecturePrefs(): LecturePrefs {

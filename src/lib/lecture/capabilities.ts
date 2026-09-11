@@ -38,6 +38,9 @@ export function resolveTranscriptionEngine(
   preference: EnginePreference,
   caps: LectureCapabilities,
 ): { engine: TranscriptionEngineId; onDevice: boolean } {
+  if (preference === "gemini") {
+    return { engine: "gemini", onDevice: false };
+  }
   if (preference === "whisper" && whisperAvailable(caps)) {
     return { engine: "whisper", onDevice: true };
   }
@@ -57,6 +60,7 @@ export function resolveTranscriptionEngine(
 }
 
 export function engineLabel(engine: TranscriptionEngineId, onDevice: boolean): string {
+  if (engine === "gemini") return "Gemini 2.0 Flash Audio (Google AI)";
   if (engine === "whisper") return "On-device Whisper";
   if (engine === "speech") {
     return onDevice ? "Browser speech recognition" : "Browser speech recognition (audio may leave this device)";

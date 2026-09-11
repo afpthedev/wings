@@ -51,10 +51,10 @@ export function Hero({ ctaHref }: Props) {
             start writing <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <Link
-            to="/pricing"
+            to="/features"
             className="relative z-10 inline-flex items-center justify-center gap-2 rounded-full border border-border-strong bg-surface-1/40 backdrop-blur px-6 sm:px-7 py-3 sm:py-3.5 text-[11px] sm:text-xs font-mono uppercase tracking-[0.2em] hover:bg-accent/40 transition-colors touch-manipulation active:scale-[0.98]"
           >
-            see pricing
+            features
           </Link>
         </motion.div>
       </div>

@@ -39,6 +39,10 @@ import {
 import { uploadImage } from "@/lib/imageUpload";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { runAgentLoop } from "@/lib/ai/tools/agentLoop";
+import { ActionStep, ToolContext } from "@/lib/ai/tools/types";
+import { AIActionBadge } from "@/components/AIActionBadge";
+import { Calendar } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -53,6 +57,7 @@ interface UIMessage extends ChatMessage {
   id: string;
   pending?: boolean;
   actions?: { label: string; onClick: () => void }[];
+  actionSteps?: ActionStep[];
   /** Object URLs for images the user attached — display only. */
   imagePreviews?: string[];
 }
@@ -77,8 +82,9 @@ const STARTERS: Record<AssistantMode, { icon: ComponentType<IconProps>; label: s
     { icon: PenLine, label: "Propose a better structure for this page" },
   ],
   agent: [
+    { icon: Calendar as any, label: "Create daily plan for today" },
+    { icon: ListChecks, label: "Check all open tasks in my workspace" },
     { icon: PenLine, label: "Continue writing this page" },
-    { icon: Wand2, label: "Summarize this page in 3 bullets" },
     { icon: FilePlus2, label: "Create a meeting notes page for tomorrow" },
     { icon: ImageIcon, label: "Generate an image of a serene mountain at dawn" },
   ],
@@ -329,23 +335,89 @@ export function AIAssistant({ open, onClose, activeEntry, allEntries, onCreateEn
     ];
 
     try {
-      let acc = "";
-      for await (const chunk of streamChat({
-        messages: history,
-        systemInstruction: `${systemPromptFor(promptedMode)}\n${context}`,
-        signal: ctrl.signal,
-        images,
-      })) {
-        acc += chunk;
-        setMessages((prev) => prev.map((m) => (m.id === asstMsg.id ? { ...m, content: acc } : m)));
+      let display = "";
+      let actions: { label: string; onClick: () => void }[] = [];
+      let finalSteps: ActionStep[] = [];
+
+      if (promptedMode === "agent") {
+        const toolContext: ToolContext = {
+          userId: user?.id,
+          allEntries,
+          activeEntry,
+          onCreateEntry,
+          onNavigate,
+        };
+
+        const result = await runAgentLoop({
+          history,
+          systemInstruction: `${systemPromptFor("agent")}\n${context}`,
+          context: toolContext,
+          signal: ctrl.signal,
+          images,
+          onPartialText: (partial) => {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === asstMsg.id ? { ...m, content: partial } : m
+              )
+            );
+          },
+          onActionStep: (step) => {
+            setMessages((prev) =>
+              prev.map((m) => {
+                if (m.id !== asstMsg.id) return m;
+                const existing = m.actionSteps || [];
+                const idx = existing.findIndex((s) => s.id === step.id);
+                const updated =
+                  idx >= 0
+                    ? existing.map((s, i) => (i === idx ? step : s))
+                    : [...existing, step];
+                return { ...m, actionSteps: updated };
+              })
+            );
+          },
+        });
+
+        display = result.finalText;
+        finalSteps = result.steps;
+
+        const finalized = finalizeAssistantOutput(display, promptedMode, modeRef.current);
+        display = finalized.display;
+        if (finalized.toolsToApply.length) {
+          actions = await applyTools(finalized.toolsToApply);
+        }
+      } else {
+        let acc = "";
+        for await (const chunk of streamChat({
+          messages: history,
+          systemInstruction: `${systemPromptFor(promptedMode)}\n${context}`,
+          signal: ctrl.signal,
+          images,
+        })) {
+          acc += chunk;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === asstMsg.id ? { ...m, content: acc } : m))
+          );
+        }
+
+        const { display: finalDisplay, toolsToApply } = finalizeAssistantOutput(
+          acc,
+          promptedMode,
+          modeRef.current
+        );
+        display = finalDisplay;
+        actions = toolsToApply.length ? await applyTools(toolsToApply) : [];
       }
 
-      const { display, toolsToApply } = finalizeAssistantOutput(acc, promptedMode, modeRef.current);
-      const actions = toolsToApply.length ? await applyTools(toolsToApply) : [];
       setMessages((prev) =>
         prev.map((m) =>
           m.id === asstMsg.id
-            ? { ...m, content: display, pending: false, actions }
+            ? {
+                ...m,
+                content: display,
+                pending: false,
+                actions,
+                actionSteps: finalSteps.length ? finalSteps : m.actionSteps,
+              }
             : m
         )
       );
@@ -503,6 +575,17 @@ export function AIAssistant({ open, onClose, activeEntry, allEntries, onCreateEn
                       src={url}
                       alt=""
                       className="h-16 w-16 rounded object-cover border border-border/40"
+                    />
+                  ))}
+                </div>
+              )}
+              {m.actionSteps && m.actionSteps.length > 0 && (
+                <div className="my-2 space-y-1">
+                  {m.actionSteps.map((step) => (
+                    <AIActionBadge
+                      key={step.id}
+                      action={step}
+                      onNavigate={onNavigate}
                     />
                   ))}
                 </div>

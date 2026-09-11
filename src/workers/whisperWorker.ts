@@ -54,15 +54,20 @@ async function loadPipeline(model: string, device: "webgpu" | "wasm", onProgress
     model: string,
     options: {
       device: "webgpu" | "wasm";
-      dtype: "fp16" | "q8";
+      dtype: any;
       progress_callback?: (info: { status?: string; file?: string; progress?: number }) => void;
     },
   ) => Promise<AsrPipeline>;
 
+  const getDtype = (dev: "webgpu" | "wasm") => {
+    if (model.includes("turbo")) return "q4";
+    return dev === "webgpu" ? "fp16" : "q8";
+  };
+
   try {
     return await create("automatic-speech-recognition", model, {
       device,
-      dtype: device === "webgpu" ? "fp16" : "q8",
+      dtype: getDtype(device),
       progress_callback: (info) => {
         onProgress({
           status: info.status ?? "progress",
@@ -75,7 +80,7 @@ async function loadPipeline(model: string, device: "webgpu" | "wasm", onProgress
     if (device === "webgpu") {
       return await create("automatic-speech-recognition", model, {
         device: "wasm",
-        dtype: "q8",
+        dtype: getDtype("wasm"),
         progress_callback: (info) => {
           onProgress({
             status: info.status ?? "progress",

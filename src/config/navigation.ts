@@ -5,7 +5,6 @@ export const FOOTER_LINKS: { h: string; links: { l: string; to: string }[] }[] =
     h: "product",
     links: [
       { l: "features", to: "/features" },
-      { l: "pricing", to: "/pricing" },
       { l: "roadmap", to: "/roadmap" },
     ],
   },
@@ -41,7 +40,6 @@ export const FOOTER_LINKS: { h: string; links: { l: string; to: string }[] }[] =
 export const NAV_LINKS = [
   { l: "features", to: "/features" },
   { l: "showcase", to: "/showcase" },
-  { l: "pricing", to: "/pricing" },
 ];
 
 export const SOCIAL = {

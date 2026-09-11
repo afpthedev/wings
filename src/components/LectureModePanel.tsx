@@ -39,6 +39,11 @@ import {
   type TranscriptChunk,
   type TranscriptionEngineId,
 } from "@/lib/lecture/types";
+import { Sparkles, Wand2, Loader2, CheckCircle2, Key } from "lucide-react";
+import { polishAndSummarizeLecture, hasConfiguredAiProvider } from "@/lib/lecture/aiPolish";
+import { getGeminiApiKey } from "@/lib/lecture/geminiAudioEngine";
+import { setApiKeyFor } from "@/lib/ai/storage";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
@@ -66,6 +71,10 @@ export function LectureModePanel({ open, onClose, hasPage, canEdit }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [engineId, setEngineId] = useState<TranscriptionEngineId | null>(null);
   const [caps] = useState(() => detectLectureCapabilities());
+  const [polishing, setPolishing] = useState(false);
+  const [polished, setPolished] = useState(false);
+  const [hasGeminiKey, setHasGeminiKey] = useState(false);
+  const [inlineKey, setInlineKey] = useState("");
 
   const sessionRef = useRef<LectureSession | null>(null);
   const headingInsertedRef = useRef(false);
@@ -80,6 +89,7 @@ export function LectureModePanel({ open, onClose, hasPage, canEdit }: Props) {
   useEffect(() => {
     if (!open) return;
     setPrefs(getLecturePrefs());
+    setHasGeminiKey(Boolean(getGeminiApiKey()));
     void listMicrophones()
       .then(setMics)
       .catch(() => setMics([]));
@@ -123,6 +133,8 @@ export function LectureModePanel({ open, onClose, hasPage, canEdit }: Props) {
     setPartial("");
     setElapsedMs(0);
     setProgress(null);
+    setPolished(false);
+    setPolishing(false);
     headingInsertedRef.current = false;
     try {
       const session = await startLectureSession(prefs, {
@@ -150,6 +162,39 @@ export function LectureModePanel({ open, onClose, hasPage, canEdit }: Props) {
     setProgress(null);
     onClose();
   }, [onClose, stop]);
+
+  const handlePolishWithAi = async () => {
+    if (chunks.length === 0) {
+      toast.error("Düzenlenecek bir transkript metni bulunamadı.");
+      return;
+    }
+
+    if (!hasConfiguredAiProvider()) {
+      toast.error("Yapay zeka sağlayıcısı tanımlanmadı", {
+        description: "Lütfen AI ayarlarını açıp Google, Anthropic veya OpenAI API anahtarınızı girin.",
+        action: {
+          label: "AI Ayarları",
+          onClick: () => window.dispatchEvent(new CustomEvent("nw:openAI")),
+        },
+      });
+      return;
+    }
+
+    setPolishing(true);
+    try {
+      const res = await polishAndSummarizeLecture(chunks);
+      if (res.success) {
+        setPolished(true);
+        toast.success("Ders notu başarıyla yapılandırıldı ve sayfaya eklendi! ✨");
+      } else {
+        toast.error(res.error || "Özet oluşturulamadı.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Bir hata oluştu.");
+    } finally {
+      setPolishing(false);
+    }
+  };
 
   if (!open) return null;
 
@@ -251,21 +296,61 @@ export function LectureModePanel({ open, onClose, hasPage, canEdit }: Props) {
                 className="gap-1.5"
               >
                 <RadioRow
+                  id="engine-gemini"
+                  value="gemini"
+                  label="Gemini 2.0 Flash Audio"
+                  hint="Google AI · En yüksek Türkçe doğruluğu, anında deşifre ve noktalama"
+                />
+                <RadioRow
                   id="engine-whisper"
                   value="whisper"
                   disabled={!whisperAvailable(caps)}
-                  label="On-device"
-                  hint={whisperAvailable(caps) ? "Whisper stays on this device" : "Not available in this browser"}
+                  label="On-device (Whisper ONNX)"
+                  hint={whisperAvailable(caps) ? "Whisper model cihazınızda çevrimdışı çalışır" : "Bu tarayıcıda desteklenmiyor"}
                 />
                 <RadioRow
                   id="engine-speech"
                   value="speech"
                   disabled={!caps.speechRecognition}
-                  label="Browser fallback"
-                  hint="May send audio to the browser vendor"
+                  label="Browser Speech (Chrome/Edge)"
+                  hint="Tarayıcının yerel ses motoru (indirme gerektirmez)"
                 />
               </RadioGroup>
             </Field>
+
+            {prefs.engine === "gemini" && !hasGeminiKey && (
+              <div className="p-3 rounded-lg border border-amber-500/25 bg-amber-500/10 space-y-2 text-xs">
+                <div className="flex items-center gap-1.5 font-medium text-amber-400">
+                  <Key className="w-3.5 h-3.5 shrink-0" />
+                  <span>Gemini API Anahtarı Gerekli</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Gemini 2.0 Flash Audio ile canlı transkripsiyon yapmak için Google AI Studio anahtarınızı girin:
+                </p>
+                <div className="flex gap-1.5">
+                  <input
+                    type="password"
+                    placeholder="AIzaSy..."
+                    value={inlineKey}
+                    onChange={(e) => setInlineKey(e.target.value)}
+                    className="flex-1 bg-background border border-border rounded px-2.5 py-1 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  <Button
+                    size="sm"
+                    className="h-7 text-xs px-3"
+                    onClick={() => {
+                      if (inlineKey.trim()) {
+                        setApiKeyFor("google", inlineKey.trim());
+                        setHasGeminiKey(true);
+                        toast.success("Gemini API anahtarı kaydedildi.");
+                      }
+                    }}
+                  >
+                    Kaydet
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {prefs.engine === "whisper" && (
               <Field label="Quality">
@@ -285,6 +370,18 @@ export function LectureModePanel({ open, onClose, hasPage, canEdit }: Props) {
                     value="balanced"
                     label="Balanced"
                     hint={`${WHISPER_MODELS.balanced.label} · about ${formatBytes(WHISPER_MODELS.balanced.bytes)} download`}
+                  />
+                  <RadioRow
+                    id="quality-accurate"
+                    value="accurate"
+                    label="High Quality"
+                    hint={`${WHISPER_MODELS.accurate.label} · about ${formatBytes(WHISPER_MODELS.accurate.bytes)} download`}
+                  />
+                  <RadioRow
+                    id="quality-turbo"
+                    value="turbo"
+                    label="Large v3 Turbo (En Yüksek Kalite)"
+                    hint={`${WHISPER_MODELS.turbo.label} · about ${formatBytes(WHISPER_MODELS.turbo.bytes)} (OpenAI SOTA)`}
                   />
                 </RadioGroup>
               </Field>
@@ -306,11 +403,14 @@ export function LectureModePanel({ open, onClose, hasPage, canEdit }: Props) {
             <Button
               data-testid="lecture-start"
               className="w-full"
-              disabled={!hasPage || !canEdit || !caps.microphone}
+              disabled={!hasPage || !canEdit || !caps.microphone || (prefs.engine === "gemini" && !hasGeminiKey)}
               onClick={() => void start()}
             >
               Start recording
             </Button>
+            {prefs.engine === "gemini" && !hasGeminiKey && (
+              <p className="text-[11px] text-amber-500">Gemini ile kayda başlamak için yukarıya API anahtarınızı girin.</p>
+            )}
             {!caps.microphone && (
               <p className="text-[11px] text-destructive">This browser cannot access the microphone.</p>
             )}
@@ -377,7 +477,48 @@ export function LectureModePanel({ open, onClose, hasPage, canEdit }: Props) {
                 <p className="text-[11px] text-muted-foreground">No transcript was produced.</p>
               )}
             </div>
-            <Button data-testid="lecture-done" className="w-full" onClick={() => void close()}>
+            {/* AI Post-Processing Card */}
+            {chunks.length > 0 && (
+              <div className="p-3.5 rounded-xl border border-primary/20 bg-primary/5 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-xs font-semibold text-foreground">
+                    AI ile Dersi Düzenle & Özetle
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Ham transkriptteki Türkçe yazım hatalarını düzeltir, ana fikirler, alt başlıklar ve aksiyon maddeleri halinde temiz bir ders notuna dönüştürüp sayfaya ekler.
+                </p>
+
+                {polished ? (
+                  <div className="flex items-center gap-2 text-xs text-emerald-500 font-medium py-1">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Ders özeti sayfaya başarıyla eklendi!</span>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    disabled={polishing}
+                    onClick={handlePolishWithAi}
+                    className="w-full text-xs font-medium gap-2 h-9"
+                  >
+                    {polishing ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        AI Notları Düzenliyor...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="w-3.5 h-3.5" />
+                        Ders Notuna Dönüştür & Sayfaya Ekle
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            )}
+
+            <Button data-testid="lecture-done" variant="outline" className="w-full" onClick={() => void close()}>
               Done
             </Button>
           </div>

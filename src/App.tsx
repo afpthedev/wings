@@ -13,7 +13,6 @@ import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import LandingFeatures from "./pages/LandingFeatures";
 import LandingShowcase from "./pages/LandingShowcase";
-import Pricing from "./pages/Pricing";
 import Legal from "./pages/Legal";
 import EditorE2E from "./pages/EditorE2E";
 import { About, Careers, Contact, Roadmap, Docs, Support, Status, Press } from "./pages/StaticPages";
@@ -128,7 +127,7 @@ function AppRoutes() {
       <Route path="/" element={<Landing />} />
       <Route path="/features" element={<LandingFeatures />} />
       <Route path="/showcase" element={<LandingShowcase />} />
-      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/pricing" element={<Navigate to="/" replace />} />
       <Route path="/about" element={<About />} />
       <Route path="/careers" element={<Careers />} />
       <Route path="/blog" element={<Blog />} />
@@ -152,13 +151,16 @@ function AppRoutes() {
 
       {/* Authenticated app */}
       <Route path="/app" element={<RequireAuth><Index /></RequireAuth>} />
+      <Route path="/app/tasks" element={<RequireAuth><Index /></RequireAuth>} />
       <Route path="/app/n/:id" element={<RequireAuth><Index /></RequireAuth>} />
       <Route path="/app/c/:collectionId" element={<RequireAuth><Index /></RequireAuth>} />
       <Route path="/app/trash" element={<RequireAuth><Index /></RequireAuth>} />
       <Route path="/n/:id" element={<RequireAuth><Index /></RequireAuth>} />
       <Route path="/c/:collectionId" element={<RequireAuth><Index /></RequireAuth>} />
+      <Route path="/tasks" element={<RequireAuth><Index /></RequireAuth>} />
       <Route path="/trash" element={<RequireAuth><Index /></RequireAuth>} />
       <Route path="/:username" element={<UsernameGate />} />
+      <Route path="/:username/tasks" element={<UsernameGate />} />
       <Route path="/:username/n/:id" element={<UsernameGate />} />
       <Route path="/:username/c/:collectionId" element={<UsernameGate />} />
       <Route path="/:username/trash" element={<UsernameGate />} />

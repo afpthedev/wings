@@ -1,0 +1,58 @@
+name: Build & Deploy to Contabo VPS
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build frontend
+        run: npm run build
+
+  deploy:
+    name: Deploy to Contabo VPS
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Executing remote SSH commands for deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.CONTABO_HOST || '144.91.97.28' }}
+          username: ${{ secrets.CONTABO_USERNAME || 'root' }}
+          password: ${{ secrets.CONTABO_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+            echo "Starting deployment on Contabo VPS..."
+            if [ ! -d "/opt/wings" ]; then
+              echo "Cloning repository..."
+              git clone https://github.com/afpthedev/wings.git /opt/wings
+            fi
+            cd /opt/wings
+            echo "Pulling latest changes..."
+            git fetch origin
+            git reset --hard origin/master || git reset --hard origin/main
+            echo "Rebuilding and restarting Docker containers..."
+            docker compose up --build -d
+            echo "Cleaning up dangling images..."
+            docker image prune -f
+            echo "Deployment successfully completed!"

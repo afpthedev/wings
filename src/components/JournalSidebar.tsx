@@ -16,6 +16,8 @@ import {
   Folder,
   FolderOpen,
 } from "@/lib/icons";
+import { FileExplorerSidebar } from "./FileExplorer/FileExplorerSidebar";
+import { HardDrive, CheckSquare } from "lucide-react";
 import {
   Sidebar,
   SidebarProvider,
@@ -88,6 +90,10 @@ interface Props {
   onEditCollection?: (id: string) => void;
   onDeleteCollection?: (id: string) => void;
   onAddToCollection?: (collectionId: string, entryId: string) => void;
+  sidebarMode?: "notes" | "tasks" | "files";
+  onSidebarModeChange?: (mode: "notes" | "tasks" | "files") => void;
+  activeServerFilePath?: string | null;
+  onSelectServerFile?: (path: string) => void;
 }
 
 type DropZone = DropPlacement | "inside";
@@ -142,6 +148,10 @@ export const JournalSidebar = memo(function JournalSidebar({
   onEditCollection,
   onDeleteCollection,
   onAddToCollection,
+  sidebarMode = "notes",
+  onSidebarModeChange,
+  activeServerFilePath = null,
+  onSelectServerFile,
 }: Props) {
   const isMobile = useIsMobile();
   const railCollapsed = !isMobile && collapsed;
@@ -189,7 +199,17 @@ export const JournalSidebar = memo(function JournalSidebar({
 
   const navItems: NavItem[] = [
     { id: "new", label: "New page", icon: <PlusNavIcon />, shortcut: "⌘N", onClick: onNew },
-    { id: "search", label: "Search", icon: <Search className="h-4 w-4" />, shortcut: "⌘/", onClick: openSearch },
+    ...(railCollapsed
+      ? [
+          {
+            id: "search",
+            label: "Search",
+            icon: <Search className="h-4 w-4" />,
+            shortcut: "⌘/",
+            onClick: openSearch,
+          },
+        ]
+      : []),
     {
       id: "overview",
       label: "Overview",
@@ -197,6 +217,17 @@ export const JournalSidebar = memo(function JournalSidebar({
       onClick: () => onHome?.(),
       active: overviewActive,
     },
+    ...(railCollapsed
+      ? [
+          {
+            id: "tasks",
+            label: "Tasks & Planner",
+            icon: <CheckSquare className="h-4 w-4 text-accent-strong" />,
+            onClick: () => onSidebarModeChange?.("tasks"),
+            active: sidebarMode === "tasks",
+          },
+        ]
+      : []),
     {
       id: "trash",
       label: "Trash",
@@ -360,28 +391,10 @@ export const JournalSidebar = memo(function JournalSidebar({
             )}
           </div>
 
-          <SidebarMenu className={cn("gap-px pt-2", railCollapsed ? "px-1" : "px-2")}>
-            {navItems.map((it) => (
-              <SidebarMenuItem key={it.id} className="list-none!">
-                <NavRow item={it} collapsed={railCollapsed} />
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-
-          <SidebarContent
-            className="gap-0! pt-2 overflow-x-hidden! flex-1 min-h-0"
-            style={{
-              transition: `opacity 150ms ${EASE}`,
-              opacity: railCollapsed ? 0 : 1,
-              pointerEvents: railCollapsed ? "none" : "auto",
-            }}
-            aria-hidden={railCollapsed}
-          >
-            <div
-              className="px-2 pb-2"
-              style={{ display: railCollapsed ? "none" : undefined }}
-            >
-              <div className="relative mb-3">
+          {/* Top Search Input */}
+          {!railCollapsed && (
+            <div className="px-2 pt-2.5">
+              <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                 <input
                   ref={searchRef}
@@ -389,7 +402,7 @@ export const JournalSidebar = memo(function JournalSidebar({
                   onChange={(e) => setSearch(e.target.value)}
                   onFocus={() => setSearching(true)}
                   placeholder="search pages…"
-                  className="w-full rounded-lg border border-sidebar-border bg-background/50 pl-8 pr-8 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="w-full rounded-lg border border-sidebar-border bg-background/50 pl-8 pr-8 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
                   onKeyDown={(e) => {
                     if (e.key === "Escape") {
                       setSearch("");
@@ -411,6 +424,83 @@ export const JournalSidebar = memo(function JournalSidebar({
                   </button>
                 )}
               </div>
+            </div>
+          )}
+
+          {!railCollapsed && (
+            <div className="flex items-center p-1 mx-2 mt-2 rounded-lg bg-sidebar-accent/50 border border-sidebar-border font-mono text-xs select-none">
+              <button
+                type="button"
+                onClick={() => onSidebarModeChange?.("notes")}
+                className={cn(
+                  "flex-1 py-1 px-2 rounded-md transition-all flex items-center justify-center gap-1.5 text-[11px]",
+                  sidebarMode === "notes"
+                    ? "bg-background text-foreground font-semibold shadow-xs border border-border/40"
+                    : "text-muted-foreground hover:text-sidebar-foreground"
+                )}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Notes</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onSidebarModeChange?.("tasks")}
+                className={cn(
+                  "flex-1 py-1 px-2 rounded-md transition-all flex items-center justify-center gap-1.5 text-[11px]",
+                  sidebarMode === "tasks"
+                    ? "bg-background text-foreground font-semibold shadow-xs border border-border/40"
+                    : "text-muted-foreground hover:text-sidebar-foreground"
+                )}
+              >
+                <CheckSquare className="w-3.5 h-3.5 text-accent-strong" />
+                <span>Tasks</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onSidebarModeChange?.("files")}
+                className={cn(
+                  "flex-1 py-1 px-2 rounded-md transition-all flex items-center justify-center gap-1.5 text-[11px]",
+                  sidebarMode === "files"
+                    ? "bg-background text-foreground font-semibold shadow-xs border border-border/40"
+                    : "text-muted-foreground hover:text-sidebar-foreground"
+                )}
+              >
+                <HardDrive className="w-3.5 h-3.5 text-accent-strong" />
+                <span>Files</span>
+              </button>
+            </div>
+          )}
+
+          {sidebarMode === "files" && !railCollapsed ? (
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <FileExplorerSidebar
+                activePath={activeServerFilePath}
+                onSelectFile={(path) => onSelectServerFile?.(path)}
+              />
+            </div>
+          ) : (
+            <>
+              <SidebarMenu className={cn("gap-px pt-2", railCollapsed ? "px-1" : "px-2")}>
+            {navItems.map((it) => (
+              <SidebarMenuItem key={it.id} className="list-none!">
+                <NavRow item={it} collapsed={railCollapsed} />
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+
+          <SidebarContent
+            className="gap-0! pt-2 overflow-x-hidden! flex-1 min-h-0"
+            style={{
+              transition: `opacity 150ms ${EASE}`,
+              opacity: railCollapsed ? 0 : 1,
+              pointerEvents: railCollapsed ? "none" : "auto",
+            }}
+            aria-hidden={railCollapsed}
+          >
+            <div
+              className="px-2 pb-2"
+              style={{ display: railCollapsed ? "none" : undefined }}
+            >
 
               {filteredPinned.length > 0 && (
                 <SidebarSection title="Pinned">
@@ -575,7 +665,9 @@ export const JournalSidebar = memo(function JournalSidebar({
                 </SidebarSection>
               )}
             </div>
-          </SidebarContent>
+              </SidebarContent>
+            </>
+          )}
         </Sidebar>
       </div>
     </SidebarProvider>
