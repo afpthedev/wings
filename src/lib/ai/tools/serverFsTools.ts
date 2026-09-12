@@ -7,6 +7,7 @@ import {
   getServerTree,
 } from "@/lib/serverFs/client";
 import { createEntry, updateEntry, getEntryTitle } from "@/lib/journal";
+import { payloadFromMarkdown } from "@/lib/entryContent";
 
 export const createProjectWorkspaceTool: AgentTool<{
   projectName: string;
@@ -62,7 +63,13 @@ export const createProjectWorkspaceTool: AgentTool<{
         pageTitle = getEntryTitle(existing);
         const curContent = existing.content || "";
         const banner = `> 📁 **Server Workspace:** \`${projectName}\` (Template: ${template})\n\n`;
-        await updateEntry(existing.id, `${banner}${curContent}`);
+        const nextContent = `${banner}${curContent}`;
+        const payload = payloadFromMarkdown(nextContent);
+        await updateEntry(existing.id, payload);
+        const updated = { ...existing, content: payload.markdown, content_json: payload.json };
+        const idx = context.allEntries.findIndex((e) => e.id === existing.id);
+        if (idx !== -1) context.allEntries[idx] = updated;
+        if (context.onUpdateEntry) await context.onUpdateEntry(updated, nextContent);
       }
     } else if (createLinkedPage) {
       const ownerId = context.userId || "anonymous";
@@ -265,7 +272,13 @@ export const linkWorkspaceToPageTool: AgentTool<{
     const cur = entry.content || "";
     const badge = `> 📁 **Server Workspace:** \`${workspacePath}\`\n\n`;
     if (!cur.includes(`\`${workspacePath}\``)) {
-      await updateEntry(pageId, `${badge}${cur}`);
+      const nextContent = `${badge}${cur}`;
+      const payload = payloadFromMarkdown(nextContent);
+      await updateEntry(pageId, payload);
+      const updated = { ...entry, content: payload.markdown, content_json: payload.json };
+      const idx = context.allEntries.findIndex((e) => e.id === pageId);
+      if (idx !== -1) context.allEntries[idx] = updated;
+      if (context.onUpdateEntry) await context.onUpdateEntry(updated, nextContent);
     }
 
     return {

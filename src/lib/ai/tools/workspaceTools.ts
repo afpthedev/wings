@@ -5,6 +5,7 @@ import {
   getEntryTitle,
   Entry,
 } from "@/lib/journal";
+import { payloadFromMarkdown } from "@/lib/entryContent";
 import {
   getStoredTasks,
   createTask as storeCreateTask,
@@ -193,7 +194,23 @@ export const updatePageTool: AgentTool<{
       nextContent = current ? `${content}\n\n${current}` : content;
     }
 
-    await updateEntry(pageId, nextContent);
+    const payload = payloadFromMarkdown(nextContent);
+    await updateEntry(pageId, payload);
+
+    const updatedEntry: Entry = {
+      ...entry,
+      content: payload.markdown,
+      content_json: payload.json,
+    };
+
+    const idx = context.allEntries.findIndex((e) => e.id === pageId);
+    if (idx !== -1) {
+      context.allEntries[idx] = updatedEntry;
+    }
+
+    if (context.onUpdateEntry) {
+      await context.onUpdateEntry(updatedEntry, nextContent);
+    }
 
     return {
       success: true,
@@ -242,7 +259,23 @@ export const linkPagesTool: AgentTool<{
     }
 
     const updatedContent = content ? `${content}\n\nRelated: ${linkStr}` : `Related: ${linkStr}`;
-    await updateEntry(sourcePageId, updatedContent);
+    const payload = payloadFromMarkdown(updatedContent);
+    await updateEntry(sourcePageId, payload);
+
+    const updatedSource: Entry = {
+      ...source,
+      content: payload.markdown,
+      content_json: payload.json,
+    };
+
+    const idx = context.allEntries.findIndex((e) => e.id === sourcePageId);
+    if (idx !== -1) {
+      context.allEntries[idx] = updatedSource;
+    }
+
+    if (context.onUpdateEntry) {
+      await context.onUpdateEntry(updatedSource, updatedContent);
+    }
 
     return {
       success: true,
@@ -384,7 +417,24 @@ export const createTaskTool: AgentTool<{
       if (p) {
         const pContent = p.content || "";
         const pLine = `- [ ] ${task.title}${task.priority !== "none" ? ` #${task.priority}` : ""}${task.dueDate ? ` @${task.dueDate}` : ""}`;
-        await updateEntry(p.id, pContent ? `${pContent}\n${pLine}` : pLine);
+        const nextContent = pContent ? `${pContent}\n${pLine}` : pLine;
+        const payload = payloadFromMarkdown(nextContent);
+        await updateEntry(p.id, payload);
+
+        const updatedPage: Entry = {
+          ...p,
+          content: payload.markdown,
+          content_json: payload.json,
+        };
+
+        const idx = context.allEntries.findIndex((e) => e.id === p.id);
+        if (idx !== -1) {
+          context.allEntries[idx] = updatedPage;
+        }
+
+        if (context.onUpdateEntry) {
+          await context.onUpdateEntry(updatedPage, nextContent);
+        }
       }
     }
 

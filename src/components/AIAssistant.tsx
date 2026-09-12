@@ -51,6 +51,7 @@ interface Props {
   allEntries: Entry[];
   onCreateEntry: (entry: Entry) => void;
   onNavigate: (id: string) => void;
+  onUpdateEntry?: (entry: Entry, newContent?: string) => Promise<void> | void;
 }
 
 interface UIMessage extends ChatMessage {
@@ -90,7 +91,7 @@ const STARTERS: Record<AssistantMode, { icon: ComponentType<IconProps>; label: s
   ],
 };
 
-export function AIAssistant({ open, onClose, activeEntry, allEntries, onCreateEntry, onNavigate }: Props) {
+export function AIAssistant({ open, onClose, activeEntry, allEntries, onCreateEntry, onNavigate, onUpdateEntry }: Props) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [input, setInput] = useState("");
@@ -346,6 +347,7 @@ export function AIAssistant({ open, onClose, activeEntry, allEntries, onCreateEn
           activeEntry,
           onCreateEntry,
           onNavigate,
+          onUpdateEntry,
         };
 
         const result = await runAgentLoop({

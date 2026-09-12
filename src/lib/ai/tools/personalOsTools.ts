@@ -5,6 +5,7 @@ import {
   getEntryTitle,
   Entry,
 } from "@/lib/journal";
+import { payloadFromMarkdown } from "@/lib/entryContent";
 import { getStoredTasks } from "@/lib/tasks/taskStore";
 import { currentPlannerWeek, formatWeekRange } from "@/lib/weeklyPlanner";
 
@@ -89,7 +90,12 @@ export const dailyPlanTool: AgentTool<{ date?: string }> = {
     let pageId: string;
     if (existing) {
       pageId = existing.id;
-      await updateEntry(pageId, md);
+      const payload = payloadFromMarkdown(md);
+      await updateEntry(pageId, payload);
+      const updated: Entry = { ...existing, content: payload.markdown, content_json: payload.json };
+      const idx = context.allEntries.findIndex((e) => e.id === pageId);
+      if (idx !== -1) context.allEntries[idx] = updated;
+      if (context.onUpdateEntry) await context.onUpdateEntry(updated, md);
     } else {
       const ownerId = context.userId || "anonymous";
       const created = await createEntry(ownerId, md, { title: planTitle });
@@ -152,7 +158,12 @@ export const weeklyPlanTool: AgentTool = {
     let pageId: string;
     if (existing) {
       pageId = existing.id;
-      await updateEntry(pageId, md);
+      const payload = payloadFromMarkdown(md);
+      await updateEntry(pageId, payload);
+      const updated: Entry = { ...existing, content: payload.markdown, content_json: payload.json };
+      const idx = context.allEntries.findIndex((e) => e.id === pageId);
+      if (idx !== -1) context.allEntries[idx] = updated;
+      if (context.onUpdateEntry) await context.onUpdateEntry(updated, md);
     } else {
       const ownerId = context.userId || "anonymous";
       const created = await createEntry(ownerId, md, { title });

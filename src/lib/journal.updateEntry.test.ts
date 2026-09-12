@@ -33,4 +33,10 @@ describe("updateEntry", () => {
       updateEntry("entry-id", { markdown: "hello", json: { type: "doc", content: [] } }),
     ).rejects.toEqual({ message: "row-level security" });
   });
+
+  it("accepts a raw markdown string and converts it to full payload", async () => {
+    updateChain.mockResolvedValue({ error: null });
+    await expect(updateEntry("entry-id", "## New heading\n\nSome text")).resolves.toBeUndefined();
+    expect(updateChain).toHaveBeenCalledWith("id", "entry-id");
+  });
 });

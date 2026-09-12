@@ -501,7 +501,15 @@ export async function createEntry(
   return row;
 }
 
-export async function updateEntry(id: string, payload: FullEditorChangePayload): Promise<void> {
+export async function updateEntry(
+  id: string,
+  payloadOrMarkdown: FullEditorChangePayload | string,
+): Promise<void> {
+  const payload =
+    typeof payloadOrMarkdown === "string"
+      ? payloadFromMarkdown(payloadOrMarkdown)
+      : payloadOrMarkdown;
+
   /**
    * Content updates use PostgREST UPDATE without RETURNING / `.select()`.
    *

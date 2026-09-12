@@ -1020,6 +1020,32 @@ export default function Index() {
     setEntries((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
   }, []);
 
+  const handleAIUpdateEntry = useCallback(
+    (updated: Entry) => {
+      // 1. Purge stale draft and pending writes so autosave doesn't revert to old text
+      clearDraft(updated.id);
+      clearPendingWrite(updated.id);
+
+      // 2. Update React entries state
+      setEntries((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+
+      // 3. Keep local mirror (IndexedDB) in sync
+      if (userId) {
+        void putCachedEntry(userId, updated);
+      }
+
+      // 4. If the modified page is currently open in the editor, update TipTap directly
+      if (updated.id === activeId) {
+        const editor = (window as any).__nw_editor;
+        if (editor) {
+          const content = resolveInitialEditorContent(updated.content, updated.content_json);
+          editor.commands.setContent(content);
+        }
+      }
+    },
+    [userId, activeId],
+  );
+
   const handlePromoteToCloud = useCallback(
     async (entryId: string, payload: EditorChangePayload) => {
       if (!userId || !isFullPayload(payload)) return;
@@ -1257,6 +1283,7 @@ export default function Index() {
         allEntries={entries}
         onCreateEntry={handleEntryCreated}
         onNavigate={setActiveId}
+        onUpdateEntry={handleAIUpdateEntry}
       />
       <LectureModePanel
         open={lectureOpen}

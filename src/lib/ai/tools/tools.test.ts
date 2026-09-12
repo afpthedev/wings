@@ -10,7 +10,7 @@ vi.mock("@/lib/journal", async (importOriginal) => {
 
 import { parseActionBlocks } from "./agentLoop";
 import { AGENT_TOOLS_MAP, formatToolsSystemPrompt } from "./registry";
-import { searchPagesTool, createTaskTool } from "./workspaceTools";
+import { searchPagesTool, createTaskTool, updatePageTool } from "./workspaceTools";
 import { linkWorkspaceToPageTool } from "./serverFsTools";
 import { ToolContext } from "./types";
 import { Entry } from "@/lib/journal";
@@ -161,5 +161,49 @@ Let me check the results.`;
 
     expect(result.success).toBe(true);
     expect(result.workspacePath).toBe("dl-experiments");
+  });
+
+  it("executes update_page tool, updates context entry, and triggers onUpdateEntry callback", async () => {
+    const mockEntry: Entry = {
+      id: "page-seneca",
+      user_id: "u1",
+      title: "Mutlu Yaşam Üzerine - Seneca",
+      content: "Eski içerik",
+      parent_id: null,
+      created_at: "",
+      updated_at: "",
+      pinned: false,
+    };
+
+    let updatedEntryReceived: Entry | null = null;
+    let updatedContentReceived: string | null = null;
+
+    const context: ToolContext = {
+      allEntries: [mockEntry],
+      activeEntry: mockEntry,
+      onCreateEntry: () => {},
+      onNavigate: () => {},
+      onUpdateEntry: (entry, nextContent) => {
+        updatedEntryReceived = entry;
+        updatedContentReceived = nextContent || null;
+      },
+    };
+
+    const newText = "## Seneca - Yeni Düzenlenmiş Metin\n\nBu güncel versiyondur.";
+    const result = await updatePageTool.execute(
+      {
+        pageId: "page-seneca",
+        content: newText,
+        mode: "replace",
+      },
+      context
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.id).toBe("page-seneca");
+    expect(context.allEntries[0].content).toBe(newText);
+    expect(updatedEntryReceived).not.toBeNull();
+    expect((updatedEntryReceived as any)?.content).toBe(newText);
+    expect(updatedContentReceived).toBe(newText);
   });
 });

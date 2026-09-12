@@ -24,6 +24,7 @@ export interface ToolContext {
   onCreateEntry: (entry: Entry) => void;
   onNavigate: (id: string) => void;
   reloadEntries?: () => Promise<void>;
+  onUpdateEntry?: (entry: Entry, newContent?: string) => Promise<void> | void;
 }
 
 export interface ActionStep {
