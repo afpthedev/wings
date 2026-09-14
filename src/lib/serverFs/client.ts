@@ -171,6 +171,10 @@ export function getServerZipUrl(path: string = ""): string {
   return `${API_BASE}/download-zip?path=${encodeURIComponent(path)}`;
 }
 
+export function getServerFileRawUrl(path: string): string {
+  return `${API_BASE}/raw?path=${encodeURIComponent(path)}`;
+}
+
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

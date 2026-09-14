@@ -68,7 +68,7 @@ export default function SharedEntry() {
         </pre>
         <p className="text-xs text-muted-foreground font-mono">this page doesn't exist or is no longer shared</p>
         <a href="/" className="text-[10px] text-muted-foreground/50 hover:text-foreground font-mono transition-colors">
-          ← wings
+          ← log.
         </a>
       </div>
     );
@@ -81,7 +81,7 @@ export default function SharedEntry() {
       <Seo title={title || "shared note"} path={`/s/${token ?? ""}`} noIndex />
       <header className="h-12 flex items-center px-4 sm:px-6 border-b border-border justify-between gap-4">
         <a href="/" className="text-[10px] text-muted-foreground/50 hover:text-foreground font-mono transition-colors uppercase tracking-wider shrink-0">
-          wings
+          log.
         </a>
         {title && (
           <span className="text-xs text-foreground font-mono truncate min-w-0">{title}</span>

@@ -70,8 +70,21 @@ const MIME_MAP: Record<string, string> = {
   gif: "image/gif",
   svg: "image/svg+xml",
   webp: "image/webp",
+  ico: "image/x-icon",
   pdf: "application/pdf",
   zip: "application/zip",
+  tar: "application/x-tar",
+  gz: "application/gzip",
+  mp3: "audio/mpeg",
+  wav: "audio/wav",
+  ogg: "audio/ogg",
+  m4a: "audio/mp4",
+  aac: "audio/aac",
+  flac: "audio/flac",
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mov: "video/quicktime",
+  mkv: "video/x-matroska",
 };
 
 export function getMimeType(fileName: string): string {

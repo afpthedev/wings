@@ -1,5 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { URL } from "node:url";
+import fs from "node:fs";
+import path from "node:path";
 import {
   getTree,
   readFile,
@@ -11,6 +13,8 @@ import {
   downloadFromUrl,
   createZip,
   getWorkspaceRoot,
+  resolveSafePath,
+  getMimeType,
 } from "./fsService.ts";
 import { PROJECT_TEMPLATES } from "./projectTemplates.ts";
 import {
@@ -117,6 +121,38 @@ export async function handleFsApi(req: IncomingMessage, res: ServerResponse): Pr
       const data = readFile(filePath);
       sendJson(res, 200, { success: true, ...data });
       return true;
+    }
+
+    // 3b. Raw file streaming / preview (PDF, images, audio, video, etc.)
+    if (pathname === "/api/fs/raw" && req.method === "GET") {
+      const filePath = searchParams.get("path");
+      if (!filePath) {
+        sendJson(res, 400, { success: false, error: "Missing 'path' parameter" });
+        return true;
+      }
+      try {
+        const absPath = resolveSafePath(filePath);
+        if (!fs.existsSync(absPath) || fs.statSync(absPath).isDirectory()) {
+          sendJson(res, 404, { success: false, error: "File not found" });
+          return true;
+        }
+        const mimeType = getMimeType(absPath);
+        const stat = fs.statSync(absPath);
+        const filename = path.basename(absPath);
+        res.writeHead(200, {
+          "Content-Type": mimeType,
+          "Content-Length": stat.size,
+          "Content-Disposition": `inline; filename="${encodeURIComponent(filename)}"`,
+          "Access-Control-Allow-Origin": "*",
+          "Accept-Ranges": "bytes",
+        });
+        const stream = fs.createReadStream(absPath);
+        stream.pipe(res);
+        return true;
+      } catch (err: any) {
+        sendJson(res, 500, { success: false, error: err?.message || "Failed to stream file" });
+        return true;
+      }
     }
 
     // 4. Save file content

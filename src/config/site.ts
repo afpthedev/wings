@@ -9,14 +9,14 @@
  * JS-capable crawlers in the meantime.
  */
 export const SITE = {
-  name: "wings",
-  brand: "Wings",
+  name: "log.",
+  brand: "log.",
   domain: "wings.nopejs.me",
   url: "https://wings.nopejs.me",
   description:
     "Notes with nested pages, LaTeX, drawings, on-device lecture transcription, and a BYOK AI panel. Keep page bodies in a local vault on this device, or share by link.",
   tagline: "notes, lectures, math, drawings, and ai.",
-  ogTitle: "Wings | think in plain text. render in everything",
+  ogTitle: "log. | think in plain text. render in everything",
   ogDescription:
     "A corner for ideas | keep private pages on this device. Markdown, LaTeX, drawings, lecture transcription, and an agentic AI without ever leaving the keyboard.",
   email: "mail@wings.nopejs.me",

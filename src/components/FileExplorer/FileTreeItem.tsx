@@ -15,6 +15,8 @@ import {
   Download,
   Link,
   Archive,
+  Volume2,
+  Video,
 } from "lucide-react";
 import type { FsItem } from "@/lib/serverFs/client";
 import { getServerZipUrl } from "@/lib/serverFs/client";
@@ -77,6 +79,20 @@ function getFileIcon(ext: string) {
     case "tar":
     case "gz":
       return <Archive className="w-4 h-4 text-orange-400 shrink-0" />;
+    case "pdf":
+      return <FileText className="w-4 h-4 text-rose-500 shrink-0" />;
+    case "mp3":
+    case "wav":
+    case "ogg":
+    case "m4a":
+    case "aac":
+    case "flac":
+      return <Volume2 className="w-4 h-4 text-violet-400 shrink-0" />;
+    case "mp4":
+    case "webm":
+    case "mov":
+    case "mkv":
+      return <Video className="w-4 h-4 text-blue-400 shrink-0" />;
     default:
       return <FileText className="w-4 h-4 text-ink-3 shrink-0" />;
   }

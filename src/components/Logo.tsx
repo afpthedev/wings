@@ -17,7 +17,7 @@ export function Logo({ size = 28, className = "", withWordmark = false, wordmark
       <img
         src={LOGO_URL}
         height={size}
-        alt="Wings"
+        alt="log."
         loading="eager"
         decoding="async"
         className="block w-auto max-w-none select-none"
@@ -25,7 +25,7 @@ export function Logo({ size = 28, className = "", withWordmark = false, wordmark
         style={{ height: size, width: "auto" }}
       />
       {withWordmark && (
-        <span className={`font-mono tracking-tight ${wordmarkClassName || "text-sm"}`}>wings</span>
+        <span className={`font-mono tracking-tight ${wordmarkClassName || "text-sm"}`}>log.</span>
       )}
     </span>
   );
