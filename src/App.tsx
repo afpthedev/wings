@@ -10,9 +10,6 @@ import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import SharedEntry from "./pages/SharedEntry";
 import NotFound from "./pages/NotFound";
-import Landing from "./pages/Landing";
-import LandingFeatures from "./pages/LandingFeatures";
-import LandingShowcase from "./pages/LandingShowcase";
 import Legal from "./pages/Legal";
 import EditorE2E from "./pages/EditorE2E";
 import { About, Careers, Contact, Roadmap, Docs, Support, Status, Press } from "./pages/StaticPages";
@@ -25,6 +22,7 @@ import { LoadingScreen } from "@/components/ui/spinner";
 import { Analytics } from "@vercel/analytics/react";
 import { useEffect, useState, type ReactElement } from "react";
 import { getMyUsername } from "@/lib/profile";
+import { getDashboardPath } from "@/lib/auth/redirect";
 import { isAnalyticsEnabled, type CookieConsent } from "@/components/CookieBanner";
 
 const queryClient = new QueryClient();
@@ -38,14 +36,15 @@ function ScrollToTop() {
   return null;
 }
 
-/** Old bookmarked hash links → dedicated marketing routes. */
+/** Old bookmarked hash links → redirect to home. */
 function LegacyHashRedirect() {
   const location = useLocation();
   const navigate = useNavigate();
   useEffect(() => {
     if (location.pathname !== "/") return;
-    const target = { features: "/features", showcase: "/showcase" }[location.hash.slice(1)];
-    if (target) navigate(target, { replace: true });
+    if (location.hash === "#features" || location.hash === "#showcase") {
+      navigate("/", { replace: true });
+    }
   }, [location.pathname, location.hash, navigate]);
   return null;
 }
@@ -114,6 +113,28 @@ function UsernameGate() {
 }
 
 
+function RootRedirect() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      navigate("/auth", { replace: true });
+      return;
+    }
+    let cancelled = false;
+    getDashboardPath(user.id).then((path) => {
+      if (!cancelled) navigate(path, { replace: true });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, loading, navigate]);
+
+  return <LoadingScreen variant="gyro" />;
+}
+
 function AppRoutes() {
   const { loading } = useAuth();
 
@@ -123,10 +144,10 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public marketing */}
-      <Route path="/" element={<Landing />} />
-      <Route path="/features" element={<LandingFeatures />} />
-      <Route path="/showcase" element={<LandingShowcase />} />
+      {/* Root redirect (directs authenticated users to workspace, unauthenticated to /auth) */}
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/features" element={<Navigate to="/" replace />} />
+      <Route path="/showcase" element={<Navigate to="/" replace />} />
       <Route path="/pricing" element={<Navigate to="/" replace />} />
       <Route path="/about" element={<About />} />
       <Route path="/careers" element={<Careers />} />
