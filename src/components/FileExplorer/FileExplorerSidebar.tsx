@@ -26,6 +26,7 @@ import { FileTreeItem } from "./FileTreeItem";
 import { CreateProjectModal } from "./CreateProjectModal";
 import { DownloadUrlModal } from "./DownloadUrlModal";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Props {
   activePath: string | null;
@@ -37,6 +38,8 @@ export function FileExplorerSidebar({ activePath, onSelectFile }: Props) {
   const [workspaceRoot, setWorkspaceRoot] = useState("");
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [draggingPath, setDraggingPath] = useState<string | null>(null);
+  const [dropTargetPath, setDropTargetPath] = useState<string | null>(null);
 
   // Modals state
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
@@ -121,6 +124,41 @@ export function FileExplorerSidebar({ activePath, onSelectFile }: Props) {
       await loadTree(true);
     } catch (err: any) {
       toast.error(err.message || "Failed to delete");
+    }
+  };
+
+  const handleMoveItem = async (sourcePath: string, targetFolder: string) => {
+    if (!sourcePath) return;
+
+    const fileName = sourcePath.split("/").pop() || "";
+    if (!fileName) return;
+
+    const sourceParent = sourcePath.includes("/")
+      ? sourcePath.substring(0, sourcePath.lastIndexOf("/"))
+      : "";
+
+    if (sourceParent === targetFolder) return;
+
+    if (targetFolder === sourcePath || targetFolder.startsWith(`${sourcePath}/`)) {
+      toast.error("Cannot move a folder into itself or its subdirectories");
+      return;
+    }
+
+    const newPath = targetFolder ? `${targetFolder}/${fileName}` : fileName;
+
+    try {
+      await renameServerItem(sourcePath, newPath);
+      toast.success(`Moved '${fileName}' to ${targetFolder ? `'${targetFolder}'` : "workspace root"}`);
+      await loadTree(true);
+
+      if (activePath === sourcePath) {
+        onSelectFile(newPath);
+      } else if (activePath && activePath.startsWith(`${sourcePath}/`)) {
+        const updated = newPath + activePath.slice(sourcePath.length);
+        onSelectFile(updated);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to move item");
     }
   };
 
@@ -267,7 +305,30 @@ export function FileExplorerSidebar({ activePath, onSelectFile }: Props) {
       </div>
 
       {/* Tree Content Area */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto p-2 space-y-0.5 transition-colors relative",
+          dropTargetPath === "__ROOT__" && "ring-1 ring-inset ring-accent-strong/60 bg-accent-strong/5 rounded-md"
+        )}
+        onDragOver={(e) => {
+          if (!draggingPath) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          setDropTargetPath("__ROOT__");
+        }}
+        onDragLeave={(e) => {
+          if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+          setDropTargetPath((prev) => (prev === "__ROOT__" ? null : prev));
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          if (draggingPath) {
+            handleMoveItem(draggingPath, "");
+          }
+          setDraggingPath(null);
+          setDropTargetPath(null);
+        }}
+      >
         {filteredItems.length === 0 ? (
           <div className="py-12 text-center text-xs text-ink-3 font-mono space-y-2">
             <HardDrive className="w-8 h-8 mx-auto opacity-30" />
@@ -281,19 +342,38 @@ export function FileExplorerSidebar({ activePath, onSelectFile }: Props) {
             </button>
           </div>
         ) : (
-          filteredItems.map((item) => (
-            <FileTreeItem
-              key={item.path}
-              item={item}
-              activePath={activePath}
-              onSelectFile={onSelectFile}
-              onNewFileInFolder={handleNewFile}
-              onNewFolderInFolder={handleNewFolder}
-              onDownloadUrlToFolder={handleDownloadUrlToFolder}
-              onRename={handleRename}
-              onDelete={handleDelete}
-            />
-          ))
+          <>
+            {filteredItems.map((item) => (
+              <FileTreeItem
+                key={item.path}
+                item={item}
+                activePath={activePath}
+                onSelectFile={onSelectFile}
+                onNewFileInFolder={handleNewFile}
+                onNewFolderInFolder={handleNewFolder}
+                onDownloadUrlToFolder={handleDownloadUrlToFolder}
+                onRename={handleRename}
+                onDelete={handleDelete}
+                draggingPath={draggingPath}
+                setDraggingPath={setDraggingPath}
+                dropTargetPath={dropTargetPath}
+                setDropTargetPath={setDropTargetPath}
+                onMoveItem={handleMoveItem}
+              />
+            ))}
+            {draggingPath && (
+              <div
+                className={cn(
+                  "mt-2 py-2 px-3 border border-dashed rounded-md text-center text-[10px] font-mono transition-colors",
+                  dropTargetPath === "__ROOT__"
+                    ? "border-accent-strong bg-accent-strong/15 text-accent-strong"
+                    : "border-border-subtle text-ink-3 hover:text-ink-2"
+                )}
+              >
+                move to workspace root
+              </div>
+            )}
+          </>
         )}
       </div>
 

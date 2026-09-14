@@ -9,7 +9,6 @@ import {
   Settings,
   Trash2,
   LayoutGrid,
-  LayoutList,
   MoreHorizontal,
   PinOff,
   Lock,
@@ -42,7 +41,7 @@ import {
   groupByMonth,
   getPinnedEntries,
 } from "@/lib/journal";
-import { matchCollection, type CollectionInfo } from "@/lib/collections";
+import type { CollectionInfo } from "@/lib/collections";
 import { isLocalEntry } from "@/lib/localContent";
 import { isDescendantOf, type DropPlacement } from "@/lib/pageOrder";
 import { Logo } from "@/components/Logo";
@@ -508,121 +507,6 @@ export const JournalSidebar = memo(function JournalSidebar({
                 </SidebarSection>
               )}
 
-              <SidebarSection
-                title="Collections"
-                action={
-                  <button
-                    type="button"
-                    onClick={onCreateCollection}
-                    className="grid size-5 place-items-center text-muted-foreground hover:text-foreground"
-                    aria-label="New collection"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </button>
-                }
-              >
-                {collections.length === 0 ? (
-                  <p className="px-2 py-1 text-xs text-muted-foreground">no collections yet</p>
-                ) : (
-                  collections
-                    .filter((collection) => {
-                      if (!q) return true;
-                      if (collection.name.toLowerCase().includes(q)) return true;
-                      return matchCollection(allEntries, collection).some(match);
-                    })
-                    .map((collection) => {
-                      const members = matchCollection(allEntries, collection);
-                      const collectionKey = `c:${collection.id}`;
-                      const isExpanded = expanded.has(collectionKey);
-                      const isActive = collection.id === activeCollectionId;
-                      const drop = dropTarget?.id === collectionKey;
-                      return (
-                        <li key={collection.id}>
-                          <div
-                            className={cn(
-                              "flex items-center group relative",
-                              drop && "ring-1 ring-accent-strong/60 rounded-lg",
-                            )}
-                            onDragOver={(event) => {
-                              if (!dragging || q) return;
-                              event.preventDefault();
-                              event.dataTransfer.dropEffect = "copy";
-                              setDropTarget({ id: collectionKey, zone: "inside" });
-                            }}
-                            onDragLeave={() => setDropTarget((prev) => (prev?.id === collectionKey ? null : prev))}
-                            onDrop={(event) => {
-                              event.preventDefault();
-                              if (dragging) onAddToCollection?.(collection.id, dragging);
-                              setDropTarget(null);
-                              setDragging(null);
-                            }}
-                          >
-                            {members.length > 0 ? (
-                              <button
-                                type="button"
-                                onClick={() => toggleExpand(collectionKey)}
-                                className="p-0.5 text-muted-foreground hover:text-sidebar-foreground transition-colors shrink-0"
-                                aria-label={isExpanded ? "collapse" : "expand"}
-                              >
-                                <ChevronRight className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-90")} />
-                              </button>
-                            ) : (
-                              <span className="w-4 shrink-0" />
-                            )}
-                            <div
-                              className={cn(
-                                "group relative flex h-8 w-full min-w-0 items-center text-[13px] transition-colors duration-75 overflow-visible",
-                                isActive ? "text-accent-strong" : "text-sidebar-foreground/80 hover:text-foreground",
-                              )}
-                            >
-                              <SharpHighlight active={isActive} />
-                              <button
-                                type="button"
-                                onClick={() => onOpenCollection?.(collection.id)}
-                                className="relative z-10 flex min-w-0 flex-1 items-center px-2"
-                              >
-                                <span className="grid size-4 shrink-0 place-items-center mr-2">
-                                  <LayoutList className="h-3 w-3 opacity-60" />
-                                </span>
-                                <span className="flex-1 truncate text-left">{collection.name || "Untitled"}</span>
-                              </button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <button
-                                    type="button"
-                                    draggable={false}
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="relative z-10 mr-1 grid size-7 shrink-0 place-items-center rounded-md text-muted-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100 hover:bg-sidebar-accent data-[state=open]:opacity-100"
-                                    aria-label="Collection actions"
-                                  >
-                                    <MoreHorizontal className="h-3.5 w-3.5" />
-                                  </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="font-mono text-xs">
-                                  <DropdownMenuItem onClick={() => onEditCollection?.(collection.id)}>
-                                    edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => onDeleteCollection?.(collection.id)}
-                                    className="text-destructive focus:text-destructive"
-                                  >
-                                    delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </div>
-                          {isExpanded && members.length > 0 && (
-                            <ul className="ml-3 border-l border-sidebar-border space-y-px mt-0.5">
-                              {members.map((child) => renderEntry(child, 1))}
-                            </ul>
-                          )}
-                        </li>
-                      );
-                    })
-                )}
-              </SidebarSection>
 
               <div
                 className={cn(

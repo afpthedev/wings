@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Folder,
   FolderOpen,
@@ -37,6 +37,11 @@ interface Props {
   onDownloadUrlToFolder: (folderPath: string) => void;
   onRename: (path: string) => void;
   onDelete: (path: string) => void;
+  draggingPath: string | null;
+  setDraggingPath: (path: string | null) => void;
+  dropTargetPath: string | null;
+  setDropTargetPath: React.Dispatch<React.SetStateAction<string | null>>;
+  onMoveItem: (sourcePath: string, targetFolderPath: string) => void;
 }
 
 function getFileIcon(ext: string) {
@@ -87,9 +92,24 @@ export function FileTreeItem({
   onDownloadUrlToFolder,
   onRename,
   onDelete,
+  draggingPath,
+  setDraggingPath,
+  dropTargetPath,
+  setDropTargetPath,
+  onMoveItem,
 }: Props) {
   const [expanded, setExpanded] = useState(depth === 0);
   const isActive = activePath === item.path;
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isDragging = draggingPath === item.path;
+  const isDropTarget = dropTargetPath === item.path;
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    };
+  }, []);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -100,16 +120,93 @@ export function FileTreeItem({
     }
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.stopPropagation();
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", item.path);
+    setDraggingPath(item.path);
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.stopPropagation();
+    setDraggingPath(null);
+    setDropTargetPath(null);
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!draggingPath || draggingPath === item.path) return;
+    // Don't allow dropping into own subfolder if dragging a folder
+    if (item.path.startsWith(`${draggingPath}/`)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    setDropTargetPath(item.path);
+
+    // Auto-expand folder on drag hover
+    if (item.isDirectory && !expanded && !hoverTimerRef.current) {
+      hoverTimerRef.current = setTimeout(() => {
+        setExpanded(true);
+      }, 500);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.stopPropagation();
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    setDropTargetPath((prev) => (prev === item.path ? null : prev));
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+
+    const source = draggingPath || e.dataTransfer.getData("text/plain");
+    setDropTargetPath(null);
+    setDraggingPath(null);
+
+    if (!source || source === item.path) return;
+
+    // If item is directory, target folder is item.path
+    // If item is file, target folder is the file's parent folder
+    const targetFolder = item.isDirectory
+      ? item.path
+      : item.path.includes("/")
+      ? item.path.substring(0, item.path.lastIndexOf("/"))
+      : "";
+
+    onMoveItem(source, targetFolder);
+  };
+
   return (
     <div className="select-none">
       <div
         onClick={handleClick}
+        draggable={true}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         style={{ paddingLeft: `${depth * 14 + 10}px` }}
         className={cn(
-          "group flex items-center justify-between py-1.5 pr-2 rounded-md text-xs cursor-pointer transition-colors relative",
+          "group flex items-center justify-between py-1.5 pr-2 rounded-md text-xs cursor-pointer transition-all relative",
           isActive
             ? "bg-accent-strong/15 text-accent-strong font-medium"
-            : "text-ink-1 hover:bg-surface-2/60 hover:text-foreground"
+            : "text-ink-1 hover:bg-surface-2/60 hover:text-foreground",
+          isDragging && "opacity-40",
+          isDropTarget && "ring-1 ring-accent-strong bg-accent-strong/20 text-accent-strong font-medium"
         )}
       >
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -231,6 +328,11 @@ export function FileTreeItem({
               onDownloadUrlToFolder={onDownloadUrlToFolder}
               onRename={onRename}
               onDelete={onDelete}
+              draggingPath={draggingPath}
+              setDraggingPath={setDraggingPath}
+              dropTargetPath={dropTargetPath}
+              setDropTargetPath={setDropTargetPath}
+              onMoveItem={onMoveItem}
             />
           ))}
         </div>
